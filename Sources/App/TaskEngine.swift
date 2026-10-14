@@ -151,7 +151,7 @@ enum TaskEngine {
 		return drafts.compactMap { draft in
 			let evidence = unquoted(draft.evidence)
 			let title = cleanTitle(draft.title)
-			guard !evidence.isEmpty, transcript.contains(evidence), !title.isEmpty,
+			guard !evidence.isEmpty, transcript.contains(evidence), !title.isEmpty, actionIsGrounded(title, in: evidence),
 				titles.insert(title.foldedWords).inserted else { return nil }
 			let why = unquoted(clean(draft.why))
 			let quote = "“\(evidence)”"
@@ -246,8 +246,27 @@ enum TaskEngine {
 			.trimmingCharacters(in: .whitespacesAndNewlines)
 	}
 
+	/// Most of the title's words must come from the evidence, so a title the model invented around a real quote is dropped.
+	static func actionIsGrounded(_ title: String, in evidence: String) -> Bool {
+		let ignored: Set = ["a", "an", "and", "at", "for", "i", "in", "me", "my", "of", "on", "or", "the", "this", "to", "with"]
+		let titleWords = Set(title.foldedWords.split(separator: " ").map(String.init)).subtracting(ignored)
+		let evidenceWords = Set(evidence.foldedWords.split(separator: " ").map(String.init)).subtracting(ignored)
+		guard !titleWords.isEmpty else { return false }
+		let matched = titleWords.filter { word in
+			evidenceWords.contains { candidate in
+				let length = min(4, word.count, candidate.count)
+				return length >= 3 ? word.prefix(length) == candidate.prefix(length) : word == candidate
+			}
+		}
+		return Double(matched.count) / Double(titleWords.count) >= 0.5
+	}
+
+	private static let selfTalk = ["i need to ", "i have to ", "i should ", "i want to ", "i will ", "i'll ", "i must ",
+		"remember to ", "don't forget to ", "make sure to "]
+
 	private static func cleanTitle(_ value: String) -> String {
 		var title = unquoted(clean(value))
+		while let prefix = selfTalk.first(where: { title.lowercased().hasPrefix($0) }) { title.removeFirst(prefix.count) }
 		while title.hasSuffix(".") { title.removeLast() }
 		guard let first = title.first else { return "" }
 		return String((first.uppercased() + title.dropFirst()).prefix(200))

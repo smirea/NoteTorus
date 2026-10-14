@@ -35,6 +35,9 @@ enum MemoTaskContractChecks {
 			TaskDraft(title: "Stretch", why: "Paraphrased.", evidence: "next time i should bring electrolytes", when: ""),
 			TaskDraft(title: "  ", why: "Empty.", evidence: "The run felt good.", when: ""),
 			TaskDraft(title: "Call Maya at noon", why: "Invented time.", evidence: "Remember to call Maya", when: "at noon"),
+			TaskDraft(title: "I need to", why: "Nothing to do.", evidence: "The run felt good.", when: ""),
+			TaskDraft(title: "Water the plants", why: "Invented around a real quote.", evidence: "The run felt good.", when: ""),
+			TaskDraft(title: "I should remember to call Maya", why: "Self-talk.", evidence: "Remember to call Maya tomorrow", when: ""),
 		]
 		let valid = TaskEngine.validate(drafts, transcript: transcript, hasEvent: true)
 		try expect(valid == [
@@ -43,6 +46,7 @@ enum MemoTaskContractChecks {
 			.init(title: "Call Maya about the dentist", notes: "“call Maya tomorrow at 3pm about the dentist”",
 				when: "tomorrow at 3pm", link: .none, timing: .during),
 			.init(title: "Call Maya at noon", notes: "Invented time.\n\n“Remember to call Maya”", when: nil, link: .none, timing: .before),
+			.init(title: "Call Maya", notes: "Self-talk.\n\n“Remember to call Maya tomorrow”", when: nil, link: .none, timing: .before),
 		], "Only exact transcript evidence survives, each title once, and a time phrase only as the transcript's own words: \(valid)")
 		let unlinked = TaskEngine.validate([drafts[0]], transcript: transcript, hasEvent: false)
 		try expect(unlinked.map(\.link) == [.none], "Without an attached event no task links to one")
@@ -124,7 +128,11 @@ enum MemoTaskContractChecks {
 		try expect(next?.series == false && next?.occurrences.map(\.start) == [occurrence(1).startDate.epochMilliseconds],
 			"Next is the first occurrence after the recording")
 		let alone = TaskEventResolver.resolve(.every, attached: attached, events: [], recordedAt: now.addingTimeInterval(-60), now: now)
-		try expect(alone?.series == false && alone?.occurrences.count == 1, "Without the cached series the attached occurrence stands alone")
+		try expect(alone?.series == true && alone?.occurrences.count == 1, "A repeating event follows its series even when only one occurrence is cached")
+		var oneOff = attached
+		oneOff.isRecurring = false
+		let single = TaskEventResolver.resolve(.every, attached: oneOff, events: [], recordedAt: now.addingTimeInterval(-60), now: now)
+		try expect(single?.series == false && single?.occurrences.count == 1, "A one-off event stands alone")
 		try expect(TaskEventResolver.resolve(.none, attached: attached, events: calendar, recordedAt: now, now: now) == nil, "None links nothing")
 	}
 

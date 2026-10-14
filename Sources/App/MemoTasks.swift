@@ -75,7 +75,9 @@ enum TaskEventResolver {
 			let upcoming = siblings.filter { $0.endDate > now && $0.startDate < now.addingTimeInterval(window) }
 			occurrences = upcoming.count > 1 ? Array(upcoming.prefix(seriesLimit)) : [next]
 		}
-		return TaskEvent(id: id, title: attached.title, allDay: attached.isAllDay, series: occurrences.count > 1, edge: edge,
+		// A repeating event follows its series even when the cache lists one occurrence; ProcrastiMate fills in the rest.
+		let series = link == .every && (occurrences.count > 1 || attached.isRecurring)
+		return TaskEvent(id: id, title: attached.title, allDay: attached.isAllDay, series: series, edge: edge,
 			minutes: edge == .before ? defaultLeadMinutes : 0, occurrences: occurrences.map(occurrence))
 	}
 }

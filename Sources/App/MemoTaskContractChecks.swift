@@ -212,6 +212,11 @@ enum MemoTaskContractChecks {
 		try await extract([], reloaded, other.id)
 		let empty = await reloaded.record(id: other.id)?.taskDelivery
 		try expect(empty == .delivered([]) && empty?.locksExtraction == false, "A memo with no tasks sends nothing and may still extract later")
+		let inFlight = TaskDeliveryJob(id: other.id, recordedAt: other.createdAt, tasks: [task("Sent before re-extraction")])
+		_ = try await reloaded.acknowledgeTasks(inFlight, remote: [])
+		let late = await reloaded.record(id: other.id)
+		try expect(late?.entry?.tasks == inFlight.tasks && late?.taskDelivery.locksExtraction == true,
+			"A PUT that lands after a re-extraction found nothing still records what ProcrastiMate accepted")
 		_ = try await reloaded.delete(id: entry.id)
 		let gone = await reloaded.record(id: entry.id)
 		try expect(gone?.taskDelivery == .notExtracted, "Deleting a memo clears its outbox")

@@ -430,7 +430,7 @@ actor JournalRepository {
 
 	/// ProcrastiMate now holds what the job sent, so those tasks become the memo's even if a re-extraction replaced them.
 	func acknowledgeTasks(_ job: TaskDeliveryJob, remote: [RemoteMemoTask]) throws -> JournalRecord? {
-		guard var record = records[job.id], record.state == .saved, record.taskDelivery.awaitsDelivery else { return nil }
+		guard var record = records[job.id], record.state == .saved, !record.taskDelivery.locksExtraction else { return nil }
 		let ids = Dictionary(remote.map { ($0.key, $0.id) }, uniquingKeysWith: { first, _ in first })
 		record.entry?.tasks = job.tasks
 		record.taskDelivery = .delivered(job.tasks.map { MemoTaskReceipt(key: $0.key, id: ids[$0.key]) })

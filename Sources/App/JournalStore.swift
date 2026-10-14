@@ -55,6 +55,8 @@ final class JournalStore {
 	@ObservationIgnored private var taskDeliveryPending = false
 	@ObservationIgnored private var taskDeliveryRepair = false
 	@ObservationIgnored private var taskDeliveryWake: Task<Void, Never>?
+	@ObservationIgnored private var taskDeliveryBackground: UIBackgroundTaskIdentifier = .invalid
+	@ObservationIgnored private var taskDeliveryStorageFailed = false
 	@ObservationIgnored private var processingWorker: Task<Void, Never>?
 	@ObservationIgnored private var activeStage: Task<Void, Never>?
 	@ObservationIgnored private var activeLease: ProcessingLease?
@@ -837,6 +839,7 @@ final class JournalStore {
 	}
 
 	func scheduleTaskDelivery(repair: Bool = false) {
+		if repair { taskDeliveryStorageFailed = false }
 		taskDeliveryPending = true
 		taskDeliveryRepair = taskDeliveryRepair || repair
 		startTaskDelivery()
@@ -845,13 +848,19 @@ final class JournalStore {
 	private func startTaskDelivery() {
 		guard let procrastiMate, hasLoadedJournal, !isDemoMode, taskDeliveryPending, taskDeliveryWorker == nil else { return }
 		taskDeliveryWake?.cancel()
-		let background = usesExternalServices
-			? UIApplication.shared.beginBackgroundTask(withName: "Send tasks to ProcrastiMate") {} : .invalid
+		if usesExternalServices {
+			taskDeliveryBackground = UIApplication.shared.beginBackgroundTask(withName: "Send tasks to ProcrastiMate") { [weak self] in
+				Task { @MainActor [weak self] in
+					self?.taskDeliveryWorker?.cancel()
+					self?.endTaskDeliveryBackground()
+				}
+			}
+		}
 		taskDeliveryWorker = Task {
 			defer {
 				taskDeliveryWorker = nil
-				if background != .invalid { UIApplication.shared.endBackgroundTask(background) }
-				if taskDeliveryPending { startTaskDelivery() } else { scheduleTaskDeliveryRetry() }
+				endTaskDeliveryBackground()
+				if taskDeliveryPending, !Task.isCancelled { startTaskDelivery() } else { scheduleTaskDeliveryRetry() }
 			}
 			while taskDeliveryPending, !Task.isCancelled {
 				taskDeliveryPending = false
@@ -861,6 +870,7 @@ final class JournalStore {
 				guard !jobs.isEmpty else { continue }
 				var status = procrastiMate.status()
 				for job in jobs {
+					guard !Task.isCancelled else { return }
 					do {
 						switch status {
 						case let .unavailable(problem):
@@ -879,16 +889,25 @@ final class JournalStore {
 							}
 						}
 					} catch {
+						// Without a saved outcome the timer would resend at once; wait for a foreground visit instead.
+						taskDeliveryStorageFailed = true
 						storageErrorMessage = "Task delivery progress couldn’t be saved. " + error.localizedDescription
+						return
 					}
 				}
 			}
 		}
 	}
 
+	private func endTaskDeliveryBackground() {
+		guard taskDeliveryBackground != .invalid else { return }
+		UIApplication.shared.endBackgroundTask(taskDeliveryBackground)
+		taskDeliveryBackground = .invalid
+	}
+
 	private func scheduleTaskDeliveryRetry() {
 		taskDeliveryWake?.cancel()
-		guard procrastiMate != nil else { return }
+		guard procrastiMate != nil, !taskDeliveryStorageFailed else { return }
 		taskDeliveryWake = Task {
 			guard let next = await repository.nextTaskDeliveryRetry() else { return }
 			do { try await Task.sleep(for: .seconds(max(0.05, next.timeIntervalSinceNow))) } catch { return }

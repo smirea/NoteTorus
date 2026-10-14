@@ -136,7 +136,35 @@ final class JournalStore {
 			namedLocations = NamedJournalLocation.demo
 			settings.calendarSyncEnabled = true
 			isLoading = false
+			for entry in entries where !entry.tasks.isEmpty {
+				let ids = entry.tasks.indices.map { "demo-task-\($0 + 1)" }
+				taskDeliveries[entry.id] = .delivered(zip(entry.tasks, ids).map { MemoTaskReceipt(key: $0.key, id: $1) })
+				remoteTasks[entry.id] = zip(entry.tasks, ids).enumerated().map { index, pair in
+					RemoteMemoTask(key: pair.0.key, id: pair.1, title: pair.0.title,
+						completedAt: index == 2 ? entry.createdAt.addingTimeInterval(86_400) : nil,
+						due: index == 1 ? RemoteMemoTask.Due(date: Date.now.addingTimeInterval(86_400)
+							.formatted(.iso8601.year().month().day()), time: "09:30") : nil,
+						event: pair.0.event)
+				}
+			}
 			#if DEBUG
+			if let index = ProcessInfo.processInfo.arguments.firstIndex(of: "-demo-tasks-state"),
+				ProcessInfo.processInfo.arguments.indices.contains(index + 1) {
+				let state: MemoTaskDelivery? = switch ProcessInfo.processInfo.arguments[index + 1] {
+				case "pending": .pending(retry: nil)
+				case "retry": .pending(retry: .failed(previous: nil,
+					message: "ProcrastiMate couldn’t be reached. These todos will be sent again.", now: .now))
+				case "not-installed": .blocked(.notInstalled)
+				case "signed-out": .blocked(.signedOut)
+				default: nil
+				}
+				if let state {
+					for id in taskDeliveries.keys {
+						taskDeliveries[id] = state
+						remoteTasks[id] = nil
+					}
+				}
+			}
 			hasUnsavedNoteChanges = ProcessInfo.processInfo.arguments.contains("-demo-unsaved-notes")
 			if ProcessInfo.processInfo.arguments.contains("-demo-cloud-pending") {
 				cloudStatusMessage = "iCloud Drive is unavailable. Recordings and your settings changes remain on this device."
@@ -877,6 +905,12 @@ final class JournalStore {
 	}
 
 	#if DEBUG
+	func seedMemoForTesting(_ entry: JournalEntry, at stage: ProcessingStage) async throws {
+		publish(try await repository.seed(entry, at: stage))
+		startUserInitiatedProcessing()
+		kickProcessing()
+	}
+
 	func waitForTaskDeliveryForContract() async {
 		while let worker = taskDeliveryWorker { await worker.value }
 	}

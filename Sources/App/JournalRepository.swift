@@ -305,6 +305,19 @@ actor JournalRepository {
 		return record
 	}
 
+	#if DEBUG
+	/// A memo with a finished transcript and no audio, queued at `stage`.
+	func seed(_ entry: JournalEntry, at stage: ProcessingStage) throws -> JournalRecord {
+		try requireLoaded()
+		var record = JournalRecord(entry: entry)
+		var job = EntryProcessing(inputRevision: 0, stage: stage)
+		job.completedStages = stage == .tasks ? [.transcribe, .reflect] : [.transcribe]
+		record.processing = job
+		try write(record)
+		return records[entry.id]!
+	}
+	#endif
+
 	func requestProcessing(id: UUID, startAt stage: ProcessingStage? = nil) throws -> JournalRecord {
 		guard var record = records[id], record.state == .saved else { throw RepositoryError.unavailableRecord }
 		var job = newProcessing(for: record)

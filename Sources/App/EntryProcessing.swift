@@ -165,7 +165,13 @@ struct ProcessingServices: Sendable {
 		},
 		reflect: { await ReflectionEngine.reflect(on: $0, includeSummary: $1) },
 		tasks: { entry, calendar in
-			await TaskEngine.extract(transcript: entry.transcript, event: entry.calendarEvent,
+			#if DEBUG
+			if let fixture = MemoSeed.fixtureTaskServices(transcript: entry.transcript) {
+				return await TaskEngine.extract(transcript: entry.transcript, event: entry.calendarEvent,
+					recordedAt: entry.createdAt, calendar: calendar, modelIsAvailable: { true }, services: fixture)
+			}
+			#endif
+			return await TaskEngine.extract(transcript: entry.transcript, event: entry.calendarEvent,
 				recordedAt: entry.createdAt, calendar: calendar)
 		})
 }

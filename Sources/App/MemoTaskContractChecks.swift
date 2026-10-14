@@ -15,6 +15,7 @@ enum MemoTaskContractChecks {
 			try await repositoryChecks()
 			try await outboxChecks()
 			try deletionAndLinkChecks()
+			try presentationChecks()
 			print("MEMO TASK CONTRACT: exact evidence and spoken times, event context, passage coverage, TaskEvent resolution, wire JSON, delivery states, outbox, delete prompt, and memo links passed")
 			fflush(stdout)
 		} catch { fatalError("MEMO TASK CONTRACT: \(error)") }
@@ -278,6 +279,29 @@ enum MemoTaskContractChecks {
 		try expect(AppDeepLink(url: URL(string: "myvoicememo://entry?id=\(id.uuidString.lowercased())")!) == .entry(id),
 			"ProcrastiMate's lowercase memo links open the memo")
 		try expect(ProcrastiMateLink.taskURL("t-1")?.absoluteString == "procrastimate://task/t-1", "Task rows open ProcrastiMate's task link")
+	}
+
+	private static func presentationChecks() throws {
+		let calendar = Calendar(identifier: .gregorian)
+		let event = TaskEvent(id: "gym", title: "Gym", allDay: false, series: true, edge: .before, minutes: 60,
+			occurrences: [.init(start: 0, end: 1, original: 0)])
+		let local = [MemoTask(key: UUID(), title: "Bring water", notes: "", when: "tomorrow at 3pm", event: nil),
+			MemoTask(key: UUID(), title: "Stretch", notes: "", when: nil, event: event)]
+		let pending = MemoTasksPresentation.rows(tasks: local, delivery: .blocked(.notInstalled), remote: nil, now: now, calendar: calendar)
+		try expect(pending.map(\.title) == ["Bring water", "Stretch"] && pending.map(\.detail) == ["Tomorrow at 3pm", "Before every Gym"]
+			&& pending.allSatisfy { $0.taskID == nil && !$0.isDone }, "Before delivery the note shows the extracted tasks, not links")
+		try expect(MemoTasksPresentation.note(delivery: .blocked(.notInstalled)) == "Could save these todos if you also had ProcrastiMate."
+			&& MemoTasksPresentation.note(delivery: .blocked(.signedOut)) == "Sign in to ProcrastiMate to save these todos."
+			&& MemoTasksPresentation.note(delivery: .delivered([])) == nil, "Blocked tasks explain what ProcrastiMate needs")
+		let receipts = MemoTaskDelivery.delivered([.init(key: local[0].key, id: "t-0"), .init(key: local[1].key, id: nil)])
+		let cached = MemoTasksPresentation.rows(tasks: local, delivery: receipts, remote: nil, now: now, calendar: calendar)
+		try expect(cached.map(\.taskID) == ["t-0"], "Before a fetch, delivered rows link only tasks ProcrastiMate holds")
+		let tomorrow = calendar.date(byAdding: .day, value: 1, to: now)!
+		let remote = [RemoteMemoTask(key: local[0].key, id: "t-0", title: "Bring a water bottle", completedAt: now,
+			due: .init(date: tomorrow.formatted(.iso8601.year().month().day()), time: nil), event: nil)]
+		let live = MemoTasksPresentation.rows(tasks: local, delivery: receipts, remote: remote, now: now, calendar: calendar)
+		try expect(live == [MemoTaskRow(id: local[0].key, title: "Bring a water bottle", isDone: true, detail: "Tomorrow", taskID: "t-0")],
+			"After a fetch the note shows ProcrastiMate's title, done state, and due date")
 	}
 
 	private static func extract(_ tasks: [MemoTask], _ repository: JournalRepository, _ id: UUID) async throws {

@@ -24,6 +24,7 @@ struct VoiceMemoApp: App {
 					_ = await ProcessingTemporaryFiles.shared.cleanOnce()
 					#if DEBUG
 					await LocalModelProbe.runFromLaunchArguments()
+					await MemoSeed.run(store: store)
 					#endif
 					#if DEBUG
 					await LocationContractChecks.runFromLaunchArguments()

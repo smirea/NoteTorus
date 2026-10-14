@@ -33,6 +33,9 @@ All rows below include `-demo`. Use native UI interactions when available to ver
 | State | Additional launch flags |
 | --- | --- |
 | Note or recording | `-demo-entry` or `-demo-recording` |
+| Note tasks, delivered | `-demo-tasks` |
+| Note tasks waiting | `-demo-tasks -demo-tasks-state` plus `pending`, `retry`, `not-installed`, or `signed-out` |
+| Delete confirmation with tasks | `-demo-tasks -demo-delete-prompt` |
 | Recording after audio reset | `-demo-recording -demo-audio-reset` |
 | Audio preparation retry | `-demo-entry -demo-finalization-failed` |
 | Incomplete or failed processing | `-demo-entry -demo-processing-partial` or `-demo-entry -demo-processing-failed` |
@@ -43,6 +46,19 @@ All rows below include `-demo`. Use native UI interactions when available to ver
 | Two calendar occurrences sharing a native identifier | `-demo-calendar-occurrences`; add `-demo-calendar-ambiguous` for an unavailable group |
 
 The weekly chart uses saved durations grouped by recording date; it is independent of transcript length or model output.
+
+## ProcrastiMate delivery without a microphone
+
+Debug builds can create a memo from text and send its tasks to a real or stub ProcrastiMate server. Launch without `-demo`:
+
+```sh
+xcrun simctl launch --console <SIMULATOR_UUID> com.stefan.myvoicememo \
+  -seed-memo "Next week before the standup I should bring the release slides. Call the plumber tomorrow at 3pm." \
+  -seed-event-title "Standup" \
+  -procrastimate-link '{"apiURL":"http://127.0.0.1:6120","token":"<bearer token>"}'
+```
+
+The app prints `SEEDED_MEMO <lowercase id>`, runs title analysis and the on-device task model, then sends the tasks. `-seed-event-title` attaches the next cached calendar event with that title, or a synthetic event shaped by `-seed-event-start <ISO 8601>`, `-seed-event-minutes`, and `-seed-event-recurring`. Where the on-device model cannot generate, as in the iOS 26.5 Simulator, add `-seed-task-drafts '[{"title":"Bring the release slides","link":"next"},{"title":"Call the plumber","when":"tomorrow at 3pm"}]'`; the drafts replace only the model call, still pass grounding and event resolution, and the memo skips title analysis. `-procrastimate-link` stands in for the shared keychain item and an installed app; `not-installed` or `signed-out` simulate the blocked states. Without it, a signed build reads the real keychain item ProcrastiMate writes. Open a seeded note with `xcrun simctl openurl <SIMULATOR_UUID> "myvoicememo://entry?id=<id>"`.
 
 ## Optional native checks
 

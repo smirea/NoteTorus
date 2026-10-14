@@ -306,13 +306,26 @@ extension JournalEntry {
 			JournalEntry(
 				createdAt: date(2026, 7, 12, 8, 47),
 				duration: 94,
-				transcript: "The morning run felt good, but I faded early. Next time I should bring electrolytes. I should also ask Maya which dentist she recommended. For morning group runs this month I want to wear the red shorts so they are easy to spot.",
+				transcript: "The morning run felt good, but I faded early. Next time I should bring electrolytes. I should also ask Maya tomorrow which dentist she recommended. For morning group runs this month I want to wear the red shorts so they are easy to spot.",
 				summary: "The run felt encouraging, with a few concrete preparations you want to carry into the next one.",
 				headline: "The run felt good enough to plan for the next one.",
 				location: JournalLocation(latitude: 41.8781, longitude: -87.6298, city: "Chicago"),
 				calendarEvent: morningRun,
 				summaryModel: "SystemLanguageModel.default",
-				transcriptModel: "Apple Speech · en-US"
+				transcriptModel: "Apple Speech · en-US",
+				tasks: [
+					MemoTask(key: UUID(uuidString: "D0000000-0000-4000-8000-000000000001")!, title: "Bring electrolytes",
+						notes: "You faded early on this run.\n\n“Next time I should bring electrolytes.”", when: nil,
+						event: TaskEventResolver.resolve(.every, attached: morningRun, events: [], recordedAt: date(2026, 7, 12, 8, 47),
+							now: date(2026, 7, 12, 8, 47))),
+					MemoTask(key: UUID(uuidString: "D0000000-0000-4000-8000-000000000002")!, title: "Ask Maya which dentist she recommended",
+						notes: "You want a dentist recommendation.\n\n“I should also ask Maya tomorrow which dentist she recommended.”",
+						when: "tomorrow", event: nil),
+					MemoTask(key: UUID(uuidString: "D0000000-0000-4000-8000-000000000003")!, title: "Wear the red shorts to morning group runs",
+						notes: "They make you easy to spot.\n\n“For morning group runs this month I want to wear the red shorts”",
+						when: "this month", event: nil),
+				],
+				taskModel: TaskEngine.modelName
 			),
 			JournalEntry(
 				createdAt: date(2026, 7, 12, 7, 21),

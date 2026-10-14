@@ -40,6 +40,9 @@ struct RootView: View {
 		if arguments.contains("-demo-entry"), let entry = store.entries.first(where: { Calendar.current.component(.day, from: $0.createdAt) == 11 }) {
 			_path = State(initialValue: [.entry(entry.id)])
 		}
+		if arguments.contains("-demo-tasks"), let entry = store.entries.first(where: { !$0.tasks.isEmpty }) {
+			_path = State(initialValue: [.entry(entry.id)])
+		}
 		if arguments.contains("-demo-review") {
 			_path = State(initialValue: [.review])
 		}
@@ -94,6 +97,14 @@ struct RootView: View {
 			Button("OK", role: .cancel) { store.clearTranscriptionAlert() }
 		} message: {
 			Text(store.transcriptionAlertMessage ?? "")
+		}
+		.alert("ProcrastiMate", isPresented: Binding(
+			get: { recordingSession.context == nil && store.procrastiMateMessage != nil },
+			set: { if !$0 { store.procrastiMateMessage = nil } }
+		)) {
+			Button("OK", role: .cancel) { store.procrastiMateMessage = nil }
+		} message: {
+			Text(store.procrastiMateMessage ?? "")
 		}
 		.alert("Journal storage", isPresented: Binding(
 			get: { !showsSettings && recordingSession.context == nil && store.storageErrorMessage != nil },

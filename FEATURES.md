@@ -15,12 +15,16 @@
 - Remembers completed exports and pending deletions across restarts, retries transient iCloud failures after 5 seconds, 30 seconds, and 3 minutes, then waits for a change, foreground visit, account change, or manual retry. A local iCloud export does not claim upload to other devices.
 - Treats local data as authoritative: iCloud note exports are not imported, and deleting a note removes its local audio and exports. A failed deletion keeps the note available to retry; pending audio cleanup retries on launch without restoring deliberately deleted notes.
 - Reports unsaved note changes with a persistent retry action. A failed note save does not block saving or sharing other notes. iCloud exports use saved metadata, and sharing waits for that note’s changes to save.
-- Stores each note's transcript, title, summary, location, attached event, and model provenance in its JSON export.
-- Prefers ElevenLabs transcription when enabled and reachable while Apple Speech supplies live partials and automatic fallback, and alerts when ElevenLabs could not be used; titles, summaries, and weekly reviews remain on-device and address the note owner as **you**.
+- Stores each note's transcript, title, summary, location, attached event, extracted tasks, and model provenance in its JSON export.
+- Prefers ElevenLabs transcription when enabled and reachable while Apple Speech supplies live partials and automatic fallback, and alerts when ElevenLabs could not be used; titles, summaries, task extraction, and weekly reviews remain on-device and address the note owner as **you**.
 - Saves processing progress per note and resumes the unfinished stage after a restart. Keeps completed transcript and analysis during reprocessing, labels incomplete transcript text, and offers Retry for failed stages without treating partial results as complete.
 - Processes long transcripts in ordered, bounded passages that cover the complete input. A failed passage keeps prior completed results and offers Retry.
 - Gives recording priority over transcription and on-device analysis, including weekly reviews. Optional work pauses through recording interruptions and user pauses, then resumes after capture stops; timed-out native work cannot overlap its replacement.
 - Generates summaries only for recordings longer than 20 seconds.
+- Finds the to-dos each memo gives you with the on-device model, once per memo, keeping only tasks whose quoted evidence is an exact transcript excerpt and a spoken time only as the memo's own words; omission is preferred and there is no task quota.
+- A task links to the attached event only when the memo ties it there (next occurrence or every occurrence, an hour before by default); being recorded during the event is not enough.
+- Sends each memo's tasks to ProcrastiMate, the source of truth for tasks, through its signed-in session; there are no reminders in this app. Transient failures retry after 5 seconds, 30 seconds, and 3 minutes, then on the next foreground visit. Tasks wait while ProcrastiMate is missing or signed out and go out on their own once it is available.
+- Reprocessing a memo whose tasks ProcrastiMate holds never extracts or sends them again; before delivery it may extract again.
 - Captures each recording's original coordinates and city when available, then resolves shared place names using the behavior in [`docs/location-model.md`](docs/location-model.md).
 - Silently refreshes and caches included events from one month ago through three months ahead when the app opens or returns to the foreground, at most once per day, without changing calendar data.
 
@@ -28,7 +32,7 @@
 
 - Shows the current date, Settings, and all notes in a continuously scrolling reverse-chronological list.
 - Each note shows its date, time, duration, title, and any active processing status; tapping it opens the **Note Screen**.
-- Swiping a note left reveals a trash button; tapping it requires deletion confirmation.
+- Swiping a note left reveals a trash button; tapping it requires deletion confirmation. When ProcrastiMate holds the note's tasks, the confirmation keeps them by default and offers deleting them too; the note is deleted either way and a failed task deletion is reported.
 - Shows an empty state when there are no notes.
 - Floating Review and Record buttons open their respective screens.
 
@@ -52,7 +56,7 @@
 
 # Note Screen
 
-- Has no visible back button and uses the native leading-edge back swipe.
+- Has no visible back button and uses the native leading-edge back swipe. `myvoicememo://entry?id=<uuid>` opens a note, with the UUID in either case, as ProcrastiMate's task links do.
 - Shows a saved place name or the captured city with the compact date, truncating long names; without location it shows `Voice memo` and omits the map.
 - Shows an attached event below the header with a calendar icon.
 - Tapping an attached event resolves the exact occurrence in its original calendar; missing or ambiguous events show an unavailable message. Uses a current provider link for nonrecurring events when preferred, with native detail as fallback; recurring events use native detail because attached links may target the whole series.
@@ -61,7 +65,8 @@
 - Playback pauses for interruptions or disconnected outputs, waits for an explicit Play afterward, and restores its position without autoplay after an audio-system reset.
 - Keeps playback position when audio preparation finishes, continues only if playback was still active, and shows a retry status instead of a progress spinner when preparation fails.
 - Shows a short generated summary for recordings longer than 20 seconds and attributes the analysis model below the summary or title.
-- A bottom-left glass button morphs into note actions that persist **Show Models** app-wide with the whole toggle row tappable, reprocess the saved audio through transcription and all generated analysis even after leaving the note while safely queuing other reprocesses, and share complete metadata as a `.json` file with a separate **Copy JSON Text** action.
+- Shows a Tasks section below the summary. Before delivery it lists the extracted tasks with their spoken time or event, plus `Could save these todos if you also had ProcrastiMate.` when ProcrastiMate is missing or a sign-in note when it is signed out. After delivery it shows ProcrastiMate's title, done state, and due date, refreshed each time the note opens; tapping a task opens it in ProcrastiMate.
+- A bottom-left glass button morphs into note actions that persist **Show Models** app-wide with the whole toggle row tappable, reprocess the saved audio through transcription and all generated analysis even after leaving the note while safely queuing other reprocesses, share complete metadata as a `.json` file with a separate **Copy JSON Text** action, and delete the note with the same confirmation as Home.
 - When enabled in Settings, shows a four-line transcript preview and its transcription model.
 - Tapping the transcript opens a selectable full-screen reader with Copy, Close, and native back-swipe controls.
 - Shows the resolved place above a noninteractive Apple map; tapping only its label morphs it into an inline name editor with an editable Apple Maps address and autocomplete.

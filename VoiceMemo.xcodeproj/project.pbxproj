@@ -21,6 +21,7 @@
 		A10000000000000000000008 /* JournalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000008 /* JournalView.swift */; };
 		A10000000000000000000009 /* RecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000009 /* RecordView.swift */; };
 		A1000000000000000000000A /* EntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000A /* EntryView.swift */; };
+		D1ADA28114B4ACEE758AE7E8 /* MemoTasksSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C163FE87A13221296606273C /* MemoTasksSection.swift */; };
 		A1000000000000000000000B /* ReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000B /* ReviewView.swift */; };
 		A1000000000000000000000C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000C /* SettingsView.swift */; };
 		A1000000000000000000000D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000E /* Assets.xcassets */; };
@@ -38,6 +39,7 @@
 		A10000000000000000000022 /* MapLocationSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000022 /* MapLocationSearch.swift */; };
 		A10000000000000000000023 /* LocationContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000023 /* LocationContractChecks.swift */; };
 		A10000000000000000000025 /* LocalModelProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000025 /* LocalModelProbe.swift */; };
+		D1D23BE5416F644879D98080 /* MemoSeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1166CEC9B9B4958FB6F5FCB /* MemoSeed.swift */; };
 		A10000000000000000000026 /* RecordingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000026 /* RecordingSession.swift */; };
 		A10000000000000000000027 /* RecordingContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000027 /* RecordingContractChecks.swift */; };
 		A10000000000000000000028 /* AudioSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000028 /* AudioSessionController.swift */; };
@@ -120,6 +122,7 @@
 		B10000000000000000000008 /* JournalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalView.swift; sourceTree = "<group>"; };
 		B10000000000000000000009 /* RecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordView.swift; sourceTree = "<group>"; };
 		B1000000000000000000000A /* EntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryView.swift; sourceTree = "<group>"; };
+		C163FE87A13221296606273C /* MemoTasksSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoTasksSection.swift; sourceTree = "<group>"; };
 		B1000000000000000000000B /* ReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewView.swift; sourceTree = "<group>"; };
 		B1000000000000000000000C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B1000000000000000000000D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -138,6 +141,7 @@
 		B10000000000000000000022 /* MapLocationSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapLocationSearch.swift; sourceTree = "<group>"; };
 		B10000000000000000000023 /* LocationContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationContractChecks.swift; sourceTree = "<group>"; };
 		B10000000000000000000025 /* LocalModelProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalModelProbe.swift; sourceTree = "<group>"; };
+		C1166CEC9B9B4958FB6F5FCB /* MemoSeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoSeed.swift; sourceTree = "<group>"; };
 		C10000000000000000000001 /* MyVoiceMemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyVoiceMemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C10000000000000000000002 /* VoiceMemoWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = VoiceMemoWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		B10000000000000000000026 /* RecordingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingSession.swift; sourceTree = "<group>"; };
@@ -223,6 +227,7 @@
 				B10000000000000000000021 /* LocationModels.swift */,
 				B10000000000000000000023 /* LocationContractChecks.swift */,
 				B10000000000000000000025 /* LocalModelProbe.swift */,
+				C1166CEC9B9B4958FB6F5FCB /* MemoSeed.swift */,
 				B10000000000000000000029 /* PlaybackContractChecks.swift */,
 				B1000000000000000000002B /* StorageContractChecks.swift */,
 				B1000000000000000000002D /* AudioFinalizationContractChecks.swift */,
@@ -276,6 +281,7 @@
 				B10000000000000000000008 /* JournalView.swift */,
 				B10000000000000000000009 /* RecordView.swift */,
 				B1000000000000000000000A /* EntryView.swift */,
+				C163FE87A13221296606273C /* MemoTasksSection.swift */,
 				B1000000000000000000000B /* ReviewView.swift */,
 				B1000000000000000000000C /* SettingsView.swift */,
 				B1000000000000000000000F /* RecordingActivityManager.swift */,
@@ -477,6 +483,7 @@
 				A10000000000000000000021 /* LocationModels.swift in Sources */,
 				A10000000000000000000023 /* LocationContractChecks.swift in Sources */,
 				A10000000000000000000025 /* LocalModelProbe.swift in Sources */,
+				D1D23BE5416F644879D98080 /* MemoSeed.swift in Sources */,
 				A10000000000000000000029 /* PlaybackContractChecks.swift in Sources */,
 				A1000000000000000000002B /* StorageContractChecks.swift in Sources */,
 				A1000000000000000000002D /* AudioFinalizationContractChecks.swift in Sources */,
@@ -530,6 +537,7 @@
 				A10000000000000000000008 /* JournalView.swift in Sources */,
 				A10000000000000000000009 /* RecordView.swift in Sources */,
 				A1000000000000000000000A /* EntryView.swift in Sources */,
+				D1ADA28114B4ACEE758AE7E8 /* MemoTasksSection.swift in Sources */,
 				A1000000000000000000000B /* ReviewView.swift in Sources */,
 				A1000000000000000000000C /* SettingsView.swift in Sources */,
 				A1000000000000000000000E /* RecordingActivityManager.swift in Sources */,

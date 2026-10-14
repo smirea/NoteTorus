@@ -14,6 +14,7 @@ struct EntryView: View {
 	@State private var calendarOpenID = UUID()
 	@State private var showsNoteActions = false
 	@State private var sharedEntry: JournalEntryExport?
+	@State private var entryPendingDeletion: JournalEntry?
 	@Namespace private var noteActionsNamespace
 	private struct AudioLoadKey: Hashable {
 		var url: URL
@@ -125,6 +126,40 @@ struct EntryView: View {
 						.entryListRow()
 				}
 
+				let taskRows = MemoTasksPresentation.rows(tasks: currentEntry.tasks, delivery: store.taskDeliveries[entry.id],
+					remote: store.remoteTasks[entry.id])
+				if !taskRows.isEmpty {
+					Text("Tasks")
+						.font(.footnote.weight(.semibold))
+						.foregroundStyle(AppStyle.secondary)
+						.accessibilityAddTraits(.isHeader)
+						.entryListRow(bottom: 2)
+					ForEach(taskRows) { row in
+						MemoTaskRowView(row: row)
+							.listRowInsets(EdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24))
+							.listRowBackground(AppStyle.background)
+							.listRowSeparator(row.id == taskRows.last?.id ? .hidden : .visible)
+							.listRowSeparatorTint(Color.white.opacity(0.14))
+					}
+					let note = MemoTasksPresentation.note(delivery: store.taskDeliveries[entry.id])
+					let model = store.settings.showModelNames ? currentEntry.taskModel : nil
+					if note != nil || model != nil {
+						VStack(alignment: .leading, spacing: 10) {
+							if let note {
+								Text(note)
+									.font(.footnote)
+									.foregroundStyle(AppStyle.secondary)
+									.fixedSize(horizontal: false, vertical: true)
+							}
+							if let model { ModelAttribution(model: model) }
+						}
+						.padding(.top, 6)
+						.entryListRow()
+					} else {
+						Color.clear.frame(height: 22).entryListRow(bottom: 0)
+					}
+				}
+
 				if store.settings.showTranscripts, !currentEntry.transcript.isEmpty {
 					VStack(alignment: .leading, spacing: 12) {
 						SummaryToPopup(
@@ -189,10 +224,18 @@ struct EntryView: View {
 		.background(NativeBackSwipeEnabler())
 		.animation(.easeOut(duration: 0.22), value: store.processingPhase(for: entry.id))
 		.animation(.easeOut(duration: 0.28), value: currentEntry.location)
+		.task(id: entry.id) {
+			#if DEBUG
+			if ProcessInfo.processInfo.arguments.contains("-demo-delete-prompt") { entryPendingDeletion = currentEntry }
+			#endif
+			if case .blocked = store.taskDeliveries[entry.id] { store.scheduleTaskDelivery(repair: true) }
+			await store.refreshRemoteTasks(for: entry.id)
+		}
 		.onDisappear {
 			calendarOpenID = UUID()
 			playback.stop()
 		}
+		.modifier(MemoDeletionConfirmation(store: store, entry: $entryPendingDeletion) { dismiss() })
 		.sheet(item: $presentedCalendarEvent) { presentedEvent in
 			CalendarEventDetail(event: presentedEvent.event)
 		}
@@ -280,6 +323,21 @@ struct EntryView: View {
 					.contentShape(Rectangle())
 			}
 			.buttonStyle(.plain)
+			.padding(.horizontal, 16)
+			.frame(height: 52)
+
+			Divider()
+
+			Button(role: .destructive) {
+				setNoteActionsPresented(false)
+				entryPendingDeletion = currentEntry
+			} label: {
+				Label("Delete", systemImage: "trash")
+					.frame(maxWidth: .infinity, alignment: .leading)
+					.contentShape(Rectangle())
+			}
+			.buttonStyle(.plain)
+			.foregroundStyle(.red)
 			.padding(.horizontal, 16)
 			.frame(height: 52)
 		}

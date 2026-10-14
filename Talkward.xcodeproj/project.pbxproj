@@ -81,6 +81,7 @@
 		A10000000000000000000057 /* CalendarEventNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000057 /* CalendarEventNavigation.swift */; };
 		A10000000000000000000058 /* CalendarNavigationContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000058 /* CalendarNavigationContractChecks.swift */; };
 		A1000000000000000000005E /* WeeklyRecordingMetricContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000005E /* WeeklyRecordingMetricContractChecks.swift */; };
+		A10000000000000000000099 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000099 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -185,6 +186,7 @@
 		B10000000000000000000057 /* CalendarEventNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEventNavigation.swift; sourceTree = "<group>"; };
 		B10000000000000000000058 /* CalendarNavigationContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarNavigationContractChecks.swift; sourceTree = "<group>"; };
 		B1000000000000000000005E /* WeeklyRecordingMetricContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyRecordingMetricContractChecks.swift; sourceTree = "<group>"; };
+		B10000000000000000000099 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -325,6 +327,7 @@
 			children = (
 				B10000000000000000000011 /* TalkwardWidgets.swift */,
 				B10000000000000000000012 /* Info.plist */,
+				B10000000000000000000099 /* Assets.xcassets */,
 			);
 			path = TalkwardWidgets;
 			sourceTree = "<group>";
@@ -359,6 +362,7 @@
 			buildPhases = (
 				H10000000000000000000002 /* Sources */,
 				D10000000000000000000002 /* Frameworks */,
+				I10000000000000000000002 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -418,6 +422,14 @@
 			files = (
 				A1000000000000000000000D /* Assets.xcassets in Resources */,
 				A10000000000000000000013 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		I10000000000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000099 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

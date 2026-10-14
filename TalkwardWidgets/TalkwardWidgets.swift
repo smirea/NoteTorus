@@ -3,7 +3,7 @@ import SwiftUI
 import WidgetKit
 
 @main
-struct VoiceMemoWidgets: WidgetBundle {
+struct TalkwardWidgets: WidgetBundle {
 	var body: some Widget {
 		StartRecordingWidget()
 		RecordingLiveActivity()
@@ -15,7 +15,7 @@ struct StartRecordingWidget: Widget {
 
 	var body: some WidgetConfiguration {
 		StaticConfiguration(kind: kind, provider: RecordingWidgetProvider()) { _ in
-			Link(destination: URL(string: "myvoicememo://record")!) {
+			Link(destination: URL(string: "talkward://record")!) {
 				Image(systemName: "mic.fill")
 					.font(.title3)
 					.widgetAccentable()
@@ -52,7 +52,7 @@ struct RecordingLiveActivity: Widget {
 			let presentation = context.state.presentation(isStale: context.isStale)
 			Link(destination: context.attributes.recordingURL) {
 				HStack(spacing: 13) {
-					VoiceMemoAppIcon(size: 38)
+					TalkwardAppIcon(size: 38)
 
 					VStack(alignment: .leading, spacing: 3) {
 						Text(context.state.locationName)
@@ -83,7 +83,7 @@ struct RecordingLiveActivity: Widget {
 			let presentation = context.state.presentation(isStale: context.isStale)
 			return DynamicIsland {
 				DynamicIslandExpandedRegion(.leading) {
-					VoiceMemoAppIcon(size: 32)
+					TalkwardAppIcon(size: 32)
 				}
 				DynamicIslandExpandedRegion(.center) {
 					VStack(alignment: .leading, spacing: 2) {
@@ -135,7 +135,7 @@ private struct RecordingStatusIcon: View {
 
 	var body: some View {
 		if presentation.timerInterval != nil {
-			VoiceMemoAppIcon(size: 22)
+			TalkwardAppIcon(size: 22)
 		} else {
 			Image(systemName: presentation.symbolName)
 				.foregroundStyle(.white)
@@ -143,7 +143,7 @@ private struct RecordingStatusIcon: View {
 	}
 }
 
-private struct VoiceMemoAppIcon: View {
+private struct TalkwardAppIcon: View {
 	let size: CGFloat
 
 	private let rows = [3, 5, 7, 8, 8, 8, 7, 5, 3]

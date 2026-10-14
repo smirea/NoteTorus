@@ -19,7 +19,7 @@ struct ICloudMirrorResult: Sendable {
 }
 
 actor ICloudDriveMirror {
-	static let containerIdentifier = "iCloud.com.stefan.myvoicememo"
+	static let containerIdentifier = "iCloud.com.stefan.talkward"
 
 	private struct FileSignature: Equatable, Sendable {
 		var size: Int64
@@ -333,7 +333,7 @@ actor ICloudDriveMirror {
 			try check()
 			try Self.requireRegularDestination(url)
 			let timestamp = Int64(Date().timeIntervalSince1970 * 1_000)
-			let stagingURL = url.deletingLastPathComponent().appendingPathComponent(".myvoicememo-\(timestamp)-\(UUID().uuidString).upload")
+			let stagingURL = url.deletingLastPathComponent().appendingPathComponent(".talkward-\(timestamp)-\(UUID().uuidString).upload")
 			defer { try? FileManager.default.removeItem(at: stagingURL) }
 			try FileManager.default.copyItem(at: sourceURL, to: stagingURL)
 			try check()
@@ -434,8 +434,8 @@ actor ICloudDriveMirror {
 
 	nonisolated private static func uploadCreatedAt(_ url: URL) -> Date? {
 		let name = url.lastPathComponent
-		guard name.hasPrefix(".myvoicememo-"), name.hasSuffix(".upload") else { return nil }
-		let stem = String(name.dropFirst(".myvoicememo-".count).dropLast(".upload".count))
+		guard name.hasPrefix(".talkward-"), name.hasSuffix(".upload") else { return nil }
+		let stem = String(name.dropFirst(".talkward-".count).dropLast(".upload".count))
 		guard stem.count > 37, stem.dropLast(36).hasSuffix("-"), canonicalUUID(String(stem.suffix(36))) != nil,
 			let timestamp = Int64(stem.dropLast(37)), timestamp > 0 else { return nil }
 		return Date(timeIntervalSince1970: Double(timestamp) / 1_000)

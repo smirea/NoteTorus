@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>MyVoiceMemo</string>
+	<string>Talkward</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -29,15 +29,15 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is saved with this entry so you can remember where it was recorded.</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>Read calendar events so you can attach a recording to the event it belongs to. MyVoiceMemo never changes calendar data.</string>
+	<string>Read calendar events so you can attach a recording to the event it belongs to. Talkward never changes calendar data.</string>
 	<key>NSUbiquitousContainers</key>
 	<dict>
-		<key>iCloud.com.stefan.myvoicememo</key>
+		<key>iCloud.com.stefan.talkward</key>
 		<dict>
 			<key>NSUbiquitousContainerIsDocumentScopePublic</key>
 			<true/>
 			<key>NSUbiquitousContainerName</key>
-			<string>MyVoiceMemo</string>
+			<string>Talkward</string>
 			<key>NSUbiquitousContainerSupportedFolderLevels</key>
 			<string>Any</string>
 		</dict>
@@ -49,7 +49,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>myvoicememo</string>
+				<string>talkward</string>
 			</array>
 		</dict>
 	</array>
@@ -75,8 +75,8 @@
 	</array>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>com.stefan.myvoicememo.processing.continued.*</string>
-		<string>com.stefan.myvoicememo.processing.recovery</string>
+		<string>com.stefan.talkward.processing.continued.*</string>
+		<string>com.stefan.talkward.processing.recovery</string>
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>

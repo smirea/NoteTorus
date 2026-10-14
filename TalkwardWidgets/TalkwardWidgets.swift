@@ -146,35 +146,10 @@ private struct RecordingStatusIcon: View {
 private struct TalkwardAppIcon: View {
 	let size: CGFloat
 
-	private let rows = [3, 5, 7, 8, 8, 8, 7, 5, 3]
-
 	var body: some View {
-		Canvas { context, canvasSize in
-			let length = min(canvasSize.width, canvasSize.height)
-			let iconRect = CGRect(x: 0, y: 0, width: length, height: length)
-			context.fill(
-				Path(roundedRect: iconRect, cornerRadius: length * 0.22),
-				with: .color(.white)
-			)
-
-			let spacing = length * 0.09
-			let diameter = max(1, length * 0.043)
-			for (rowIndex, count) in rows.enumerated() {
-				let rowWidth = CGFloat(count - 1) * spacing
-				let startX = (length - rowWidth) / 2
-				let y = length * 0.22 + CGFloat(rowIndex) * length * 0.07
-				for column in 0..<count {
-					let x = startX + CGFloat(column) * spacing
-					let dot = CGRect(
-						x: x - diameter / 2,
-						y: y - diameter / 2,
-						width: diameter,
-						height: diameter
-					)
-					context.fill(Path(ellipseIn: dot), with: .color(.black))
-				}
-			}
-		}
-		.frame(width: size, height: size)
+		Image("TalkwardMark")
+			.resizable()
+			.frame(width: size, height: size)
+			.clipShape(.rect(cornerRadius: size * 0.22))
 	}
 }

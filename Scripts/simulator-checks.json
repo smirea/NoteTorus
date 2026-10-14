@@ -66,6 +66,11 @@
       "marker": "MODEL OUTCOME CONTRACT: completion, skip, unavailable, failure, cancellation, and weekly review checks passed"
     },
     {
+      "name": "MemoTaskContractChecks",
+      "flag": "-memo-task-contract-tests",
+      "marker": "MEMO TASK CONTRACT: exact evidence and spoken times, event context, passage coverage, TaskEvent resolution, wire JSON, delivery states, outbox, delete prompt, and memo links passed"
+    },
+    {
       "name": "WeeklyRecordingMetricContractChecks",
       "flag": "-weekly-recording-metric-contract-tests",
       "marker": "WEEKLY RECORDING METRIC CONTRACT: seven local days, DST and half-open boundaries, duration-only finite aggregation, identical generated/fallback/empty/cancelled metrics, and bootstrap-safe Store loading passed"

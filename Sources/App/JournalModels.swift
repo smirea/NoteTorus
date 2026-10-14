@@ -109,6 +109,8 @@ struct JournalEntry: Identifiable, Codable, Hashable, Sendable {
 		case summaryModel
 		case transcriptModel
 		case analysis
+		case tasks
+		case taskModel
 	}
 
 	let id: UUID
@@ -123,6 +125,8 @@ struct JournalEntry: Identifiable, Codable, Hashable, Sendable {
 	var summaryModel: String?
 	var transcriptModel: String?
 	var analysis: MemoAnalysis?
+	var tasks: [MemoTask]
+	var taskModel: String?
 
 	init(
 		id: UUID = UUID(),
@@ -136,7 +140,9 @@ struct JournalEntry: Identifiable, Codable, Hashable, Sendable {
 		calendarEvent: JournalCalendarEvent? = nil,
 		summaryModel: String? = nil,
 		transcriptModel: String? = nil,
-		analysis: MemoAnalysis? = nil
+		analysis: MemoAnalysis? = nil,
+		tasks: [MemoTask] = [],
+		taskModel: String? = nil
 	) {
 		self.id = id
 		self.createdAt = createdAt
@@ -150,6 +156,8 @@ struct JournalEntry: Identifiable, Codable, Hashable, Sendable {
 		self.summaryModel = summaryModel
 		self.transcriptModel = transcriptModel
 		self.analysis = analysis
+		self.tasks = tasks
+		self.taskModel = taskModel
 	}
 
 	init(from decoder: Decoder) throws {
@@ -166,6 +174,8 @@ struct JournalEntry: Identifiable, Codable, Hashable, Sendable {
 		summaryModel = try container.decodeIfPresent(String.self, forKey: .summaryModel)
 		transcriptModel = try container.decodeIfPresent(String.self, forKey: .transcriptModel)
 		analysis = try container.decodeIfPresent(MemoAnalysis.self, forKey: .analysis)
+		tasks = try container.decodeIfPresent([MemoTask].self, forKey: .tasks) ?? []
+		taskModel = try container.decodeIfPresent(String.self, forKey: .taskModel)
 	}
 }
 
@@ -242,6 +252,7 @@ enum EntryProcessingPhase: Equatable, Sendable {
 	case transcribing
 	case queued
 	case reflecting
+	case tasks
 	case complete
 
 	var title: String {
@@ -254,6 +265,7 @@ enum EntryProcessingPhase: Equatable, Sendable {
 		case .transcribing: "Transcribing"
 		case .queued: "Waiting"
 		case .reflecting: "Analyzing"
+		case .tasks: "Finding tasks"
 		case .complete: "Ready"
 		}
 	}

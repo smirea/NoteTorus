@@ -190,16 +190,26 @@ enum ProcessingRepositoryContractChecks {
 		old["entry"] = oldEntry
 		var oldJob = old["processing"] as! [String: Any]
 		oldJob["stage"] = "reminders"
-		oldJob["status"] = "queued"
-		oldJob["completedStages"] = ["finalizeAudio", "transcribe", "reflect"]
+		oldJob["status"] = "complete"
+		oldJob["completedStages"] = ["finalizeAudio", "transcribe", "reflect", "reminders"]
 		oldJob["skippedStages"] = ["reminders"]
 		old["processing"] = oldJob
 		try JSONSerialization.data(withJSONObject: old).write(to: manifest)
-		let legacy = try await JournalRepository(rootURL: root).load()
-		let record = legacy.records.first { $0.id == entry.id }
-		try expect(legacy.issues.isEmpty && record?.entry?.transcript == entry.transcript && record?.processing?.status == .complete
-			&& record?.processing?.completedStages == [.finalizeAudio, .transcribe, .reflect] && record?.processing?.skippedStages.isEmpty == true,
-			"Manifests written with retired reminder fields and stages must load as completed notes")
+		let legacy = JournalRepository(rootURL: root)
+		let loaded = try await legacy.load()
+		let record = loaded.records.first { $0.id == entry.id }
+		let legacyWork = try await legacy.claimProcessing(now: .distantFuture)
+		try expect(loaded.issues.isEmpty && record?.entry?.transcript == entry.transcript && record?.entry?.tasks.isEmpty == true
+			&& record?.processing?.status == .complete && record?.processing?.completedStages.contains(.tasks) == true
+			&& record?.taskDelivery == .notExtracted && legacyWork == nil,
+			"A note that finished reminders loads as complete and is not sent to ProcrastiMate")
+		oldJob["status"] = "queued"
+		oldJob["completedStages"] = ["finalizeAudio", "transcribe", "reflect"]
+		old["processing"] = oldJob
+		try JSONSerialization.data(withJSONObject: old).write(to: manifest)
+		let resumed = JournalRepository(rootURL: root)
+		_ = try await resumed.load()
+		_ = try await claim(resumed, stage: .tasks)
 	}
 
 	private static func migrationChecks() async throws {

@@ -6,6 +6,7 @@ struct JournalRecord: Codable, Sendable {
 	private enum CodingKeys: String, CodingKey {
 		case schemaVersion, id, entry, state, ownedAudioFilenames, inputRevision, revision, processing
 		case contentRevision, exportedRevision, cloudRetry, cloudAudioReceipt, cloudDeletionReferences, cloudMetadataReceipt
+		case taskDelivery, remoteTasks
 	}
 	var schemaVersion = 1
 	let id: UUID
@@ -21,6 +22,8 @@ struct JournalRecord: Codable, Sendable {
 	var cloudAudioReceipt: CloudAudioReceipt?
 	var cloudMetadataReceipt: CloudMetadataReceipt?
 	var cloudDeletionReferences: Set<String> = []
+	var taskDelivery = MemoTaskDelivery.notExtracted
+	var remoteTasks: [RemoteMemoTask]?
 
 	init(entry: JournalEntry, state: State = .saved, ownedAudioFilenames: Set<String> = []) {
 		id = entry.id
@@ -46,7 +49,15 @@ struct JournalRecord: Codable, Sendable {
 		cloudMetadataReceipt = try values.decodeIfPresent(CloudMetadataReceipt.self, forKey: .cloudMetadataReceipt)
 		cloudDeletionReferences = try values.decodeIfPresent(Set<String>.self, forKey: .cloudDeletionReferences)
 			?? (state == .deleted ? ownedAudioFilenames.union([id.uuidString]) : [])
+		taskDelivery = try values.decodeIfPresent(MemoTaskDelivery.self, forKey: .taskDelivery) ?? .notExtracted
+		remoteTasks = try values.decodeIfPresent([RemoteMemoTask].self, forKey: .remoteTasks)
 	}
+}
+
+struct TaskDeliveryJob: Equatable, Sendable {
+	let id: UUID
+	let recordedAt: Date
+	let tasks: [MemoTask]
 }
 
 struct JournalLoad: Sendable {
@@ -170,6 +181,8 @@ actor JournalRepository {
 		record.state = .deleted
 		record.entry = nil
 		record.processing = nil
+		record.taskDelivery = .notExtracted
+		record.remoteTasks = nil
 		try write(record)
 		return records[id]!.cloudDeletionReferences
 	}
@@ -372,6 +385,84 @@ actor JournalRepository {
 		return records[record.id]!
 	}
 
+	func commitTasks(_ result: TaskExtractionResult, lease: ProcessingLease) throws -> JournalRecord {
+		var record = try currentRecord(for: lease)
+		guard lease.stage == .tasks, result.outcome.isComplete else { throw RepositoryError.staleProcessing }
+		if !record.taskDelivery.locksExtraction {
+			record.entry?.tasks = result.tasks
+			record.entry?.taskModel = result.modelName
+			record.taskDelivery = result.tasks.isEmpty ? .delivered([]) : .pending(retry: nil)
+			record.remoteTasks = nil
+		}
+		advance(&record, after: .tasks)
+		if result.outcome == .skipped { record.processing?.skippedStages.insert(.tasks) }
+		try write(record)
+		return records[record.id]!
+	}
+
+	func taskDeliveryJobs(repair: Bool = false, now: Date = .now) -> [TaskDeliveryJob] {
+		records.values.compactMap { record -> TaskDeliveryJob? in
+			guard record.state == .saved, let entry = record.entry, !entry.tasks.isEmpty else { return nil }
+			switch record.taskDelivery {
+			case let .pending(retry):
+				guard repair || retry.map({ $0.isDue(at: now) }) ?? true else { return nil }
+			case .blocked:
+				guard repair else { return nil }
+			case .notExtracted, .delivered:
+				return nil
+			}
+			return TaskDeliveryJob(id: record.id, recordedAt: entry.createdAt, tasks: entry.tasks)
+		}.sorted { ($0.recordedAt, $0.id.uuidString) < ($1.recordedAt, $1.id.uuidString) }
+	}
+
+	/// ProcrastiMate now holds what the job sent, so those tasks become the memo's even if a re-extraction replaced them.
+	func acknowledgeTasks(_ job: TaskDeliveryJob, remote: [RemoteMemoTask]) throws -> JournalRecord? {
+		guard var record = records[job.id], record.state == .saved, record.taskDelivery.awaitsDelivery else { return nil }
+		let ids = Dictionary(remote.map { ($0.key, $0.id) }, uniquingKeysWith: { first, _ in first })
+		record.entry?.tasks = job.tasks
+		record.taskDelivery = .delivered(job.tasks.map { MemoTaskReceipt(key: $0.key, id: ids[$0.key]) })
+		record.remoteTasks = remote
+		try write(record)
+		return records[job.id]
+	}
+
+	func failTasks(_ job: TaskDeliveryJob, message: String, now: Date = .now) throws -> JournalRecord? {
+		guard var record = currentTaskRecord(job) else { return nil }
+		let previous: CloudRetryState? = if case let .pending(retry) = record.taskDelivery { retry } else { nil }
+		record.taskDelivery = .pending(retry: .failed(previous: previous, message: message, now: now))
+		try write(record)
+		return records[job.id]
+	}
+
+	func blockTasks(_ job: TaskDeliveryJob, _ problem: MemoTaskLinkProblem) throws -> JournalRecord? {
+		guard var record = currentTaskRecord(job), record.taskDelivery != .blocked(problem) else { return nil }
+		record.taskDelivery = .blocked(problem)
+		try write(record)
+		return records[job.id]
+	}
+
+	func nextTaskDeliveryRetry() -> Date? {
+		records.values.compactMap { record -> Date? in
+			guard record.state == .saved, record.entry?.tasks.isEmpty == false,
+				case let .pending(retry) = record.taskDelivery else { return nil }
+			guard let retry else { return .distantPast }
+			return retry.retryAfter
+		}.min()
+	}
+
+	func cacheRemoteTasks(_ remote: [RemoteMemoTask], for id: UUID) throws -> JournalRecord? {
+		guard var record = records[id], record.state == .saved, record.remoteTasks != remote else { return nil }
+		record.remoteTasks = remote
+		try write(record)
+		return records[id]
+	}
+
+	private func currentTaskRecord(_ job: TaskDeliveryJob) -> JournalRecord? {
+		guard let record = records[job.id], record.state == .saved, record.entry?.tasks == job.tasks,
+			record.taskDelivery.awaitsDelivery else { return nil }
+		return record
+	}
+
 	func savePartial(_ progress: TranscriptionProgress, lease: ProcessingLease) throws -> JournalRecord {
 		var record = try currentRecord(for: lease)
 		guard lease.stage == .transcribe else { throw RepositoryError.staleProcessing }
@@ -447,7 +538,8 @@ actor JournalRepository {
 		switch stage {
 		case .finalizeAudio: job.stage = .transcribe
 		case .transcribe: job.stage = .reflect
-		case .reflect: job.status = .complete
+		case .reflect: job.stage = .tasks
+		case .tasks: job.status = .complete
 		}
 		record.processing = job
 	}
@@ -463,7 +555,7 @@ actor JournalRepository {
 				if record.processing == nil, let entry = record.entry {
 					var job = newProcessing(for: record)
 					if !["Processing recording", "Recovered recording"].contains(entry.headline), entry.transcript != "No transcript available." {
-						job.completedStages = [.transcribe, .reflect]
+						job.completedStages = [.transcribe, .reflect, .tasks]
 					}
 					if entry.audioFilename == nil {
 						job.status = .complete
@@ -473,7 +565,7 @@ actor JournalRepository {
 					} else if !RecordingAudioFormat.needsFinalization(entry.audioFilename!),
 						!["Processing recording", "Recovered recording"].contains(entry.headline) {
 						job.status = .complete
-						job.completedStages = [.transcribe, .reflect]
+						job.completedStages = [.transcribe, .reflect, .tasks]
 					}
 					record.processing = job
 					try write(record)

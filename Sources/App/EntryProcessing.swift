@@ -1,13 +1,23 @@
 import Foundation
 
 enum ProcessingStage: String, Codable, Hashable, Sendable {
-	case finalizeAudio, transcribe, reflect
+	case finalizeAudio, transcribe, reflect, tasks
 	var phase: EntryProcessingPhase {
 		switch self {
 		case .finalizeAudio: .finalizing
 		case .transcribe: .transcribing
 		case .reflect: .reflecting
+		case .tasks: .tasks
 		}
+	}
+
+	init(from decoder: Decoder) throws {
+		let raw = try decoder.singleValueContainer().decode(String.self)
+		// Tasks replaced the reminders stage, so a note that finished reminders is not sent to ProcrastiMate.
+		guard let stage = Self(rawValue: raw == "reminders" ? "tasks" : raw) else {
+			throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "Unknown stage \(raw)"))
+		}
+		self = stage
 	}
 }
 
@@ -44,19 +54,11 @@ struct EntryProcessing: Codable, Hashable, Sendable {
 		requestID = try values.decode(UUID.self, forKey: .requestID)
 		requestedAt = try values.decode(Date.self, forKey: .requestedAt)
 		inputRevision = try values.decode(Int.self, forKey: .inputRevision)
-		// Records written before reminders were removed can name a stage that no longer exists.
-		let rawStage = try values.decode(String.self, forKey: .stage)
+		stage = try values.decode(ProcessingStage.self, forKey: .stage)
 		status = try values.decode(Status.self, forKey: .status)
 		attemptID = try values.decodeIfPresent(UUID.self, forKey: .attemptID)
-		completedStages = Set((try values.decodeIfPresent([String].self, forKey: .completedStages) ?? []).compactMap(ProcessingStage.init(rawValue:)))
-		skippedStages = Set((try values.decodeIfPresent([String].self, forKey: .skippedStages) ?? []).compactMap(ProcessingStage.init(rawValue:)))
-		if let known = ProcessingStage(rawValue: rawStage) {
-			stage = known
-		} else {
-			stage = .reflect
-			status = .complete
-			attemptID = nil
-		}
+		completedStages = try values.decodeIfPresent(Set<ProcessingStage>.self, forKey: .completedStages) ?? []
+		skippedStages = try values.decodeIfPresent(Set<ProcessingStage>.self, forKey: .skippedStages) ?? []
 		failureKind = try values.decodeIfPresent(ProcessingFailureKind.self, forKey: .failureKind)
 		partialTranscript = try values.decodeIfPresent(TranscriptionProgress.self, forKey: .partialTranscript)
 		failure = try values.decodeIfPresent(String.self, forKey: .failure)
@@ -97,6 +99,7 @@ enum ProcessingDeadline {
 		case .finalizeAudio: return max(120, duration * 2 + 60)
 		case .transcribe: return max(180, duration * 3 + 120)
 		case .reflect: return max(180, context / 20 + 120)
+		case .tasks: return max(180, context / 20 + 120)
 		}
 	}
 }
@@ -154,10 +157,15 @@ enum JournalEdit: Sendable {
 struct ProcessingServices: Sendable {
 	var transcribe: @Sendable (URL, Bool, String?, @escaping @Sendable (TranscriptionProgress) -> Void) async throws -> TranscriptionResult
 	var reflect: @Sendable (String, Bool) async -> ReflectionResult
+	var tasks: @Sendable (JournalEntry, [JournalCalendarEvent]) async -> TaskExtractionResult
 
 	static let live = ProcessingServices(
 		transcribe: { url, preferred, key, update in
 			try await AudioTranscriber.transcribe(url: url, preferElevenLabs: preferred, elevenLabsAPIKey: key, onUpdate: update)
 		},
-		reflect: { await ReflectionEngine.reflect(on: $0, includeSummary: $1) })
+		reflect: { await ReflectionEngine.reflect(on: $0, includeSummary: $1) },
+		tasks: { entry, calendar in
+			await TaskEngine.extract(transcript: entry.transcript, event: entry.calendarEvent,
+				recordedAt: entry.createdAt, calendar: calendar)
+		})
 }

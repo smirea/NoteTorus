@@ -47,6 +47,14 @@ final class JournalStore {
 	@ObservationIgnored private var iCloudRevision = 0
 	@ObservationIgnored private var pendingICloudDeletionReferences = Set<String>()
 	private(set) var processingStates: [UUID: EntryProcessing] = [:]
+	private(set) var taskDeliveries: [UUID: MemoTaskDelivery] = [:]
+	private(set) var remoteTasks: [UUID: [RemoteMemoTask]] = [:]
+	var procrastiMateMessage: String?
+	@ObservationIgnored private let procrastiMate: ProcrastiMateClient?
+	@ObservationIgnored private var taskDeliveryWorker: Task<Void, Never>?
+	@ObservationIgnored private var taskDeliveryPending = false
+	@ObservationIgnored private var taskDeliveryRepair = false
+	@ObservationIgnored private var taskDeliveryWake: Task<Void, Never>?
 	@ObservationIgnored private var processingWorker: Task<Void, Never>?
 	@ObservationIgnored private var activeStage: Task<Void, Never>?
 	@ObservationIgnored private var activeLease: ProcessingLease?
@@ -90,13 +98,15 @@ final class JournalStore {
 	private let usesExternalServices: Bool
 
 	init(storageRootURL: URL? = nil, processingServices: ProcessingServices? = nil,
-		cloudServices: CloudServices? = nil, processingBackgroundTasks: ProcessingBackgroundTasks? = nil) {
+		cloudServices: CloudServices? = nil, processingBackgroundTasks: ProcessingBackgroundTasks? = nil,
+		procrastiMate: ProcrastiMateClient? = nil) {
 		self.cloudServices = cloudServices ?? .live
 		mirroringEnabled = storageRootURL == nil || cloudServices != nil
 		self.processingServices = processingServices ?? .live
 		processingEnabled = storageRootURL == nil || processingServices != nil
 		isDemoMode = storageRootURL == nil && ProcessInfo.processInfo.arguments.contains("-demo")
 		usesExternalServices = storageRootURL == nil
+		self.procrastiMate = procrastiMate ?? (storageRootURL == nil && !isDemoMode ? .live : nil)
 		self.processingBackgroundTasks = processingBackgroundTasks ??
 			(storageRootURL == nil && !isDemoMode ? ProcessingBackgroundTasks() : nil)
 		let initialSettings = storageRootURL == nil ? JournalSettings.load() : JournalSettings()
@@ -194,6 +204,10 @@ final class JournalStore {
 				processing[record.id] = record.processing
 				phases[record.id] = record.processing?.phase
 				if record.state == .deleted { deleted.insert(record.id) }
+				else {
+					taskDeliveries[record.id] = record.taskDelivery
+					remoteTasks[record.id] = record.remoteTasks
+				}
 			}
 			committedRecords = records
 			processingStates = processing
@@ -206,6 +220,7 @@ final class JournalStore {
 			hasLoadedJournal = true
 			isLoading = false
 			kickProcessing()
+			scheduleTaskDelivery(repair: true)
 			configurationBootstrapTask = Task { await loadConfiguration() }
 
 		} catch {
@@ -367,6 +382,7 @@ final class JournalStore {
 		updateBackgroundProcessing()
 		updateServiceAdmission()
 		scheduleICloudDriveMirror(changed: false, repair: true)
+		scheduleTaskDelivery(repair: true)
 	}
 
 	func beginCapturePriority(owner: UUID) async {
@@ -495,7 +511,7 @@ final class JournalStore {
 
 	private func serviceActivityChanged(_ active: Bool, lease: ProcessingLease) {
 		guard activeLease == lease, !processingSuspended, activeStage?.isCancelled == false else { return }
-		var perResponse = lease.stage == .reflect
+		var perResponse = lease.stage == .reflect || lease.stage == .tasks
 		#if DEBUG
 		if processingDeadlineOverride != nil { perResponse = false }
 		#endif
@@ -556,6 +572,18 @@ final class JournalStore {
 					return
 				}
 				record = try await repository.commitReflection(result, lease: lease)
+			case .tasks:
+				let result: TaskExtractionResult
+				if committedRecords[entry.id]?.taskDelivery.locksExtraction == true {
+					result = TaskExtractionResult(tasks: [], outcome: .skipped)
+				} else { result = await processingServices.tasks(entry, calendarSync.events) }
+				try Task.checkCancellation()
+				guard result.outcome.isComplete else {
+					try await failModelStage(result.outcome, lease: lease)
+					return
+				}
+				record = try await repository.commitTasks(result, lease: lease)
+				scheduleTaskDelivery()
 			}
 			publish(record)
 			scheduleICloudDriveMirror()
@@ -727,6 +755,10 @@ final class JournalStore {
 		committedRecords[record.id] = record
 		defer { updateBackgroundProcessing() }
 		if processingStates[record.id] != record.processing { processingStates[record.id] = record.processing }
+		if record.state == .saved {
+			if taskDeliveries[record.id] != record.taskDelivery { taskDeliveries[record.id] = record.taskDelivery }
+			if remoteTasks[record.id] != record.remoteTasks { remoteTasks[record.id] = record.remoteTasks }
+		}
 		if entryProcessingPhases[record.id] != record.processing?.phase { entryProcessingPhases[record.id] = record.processing?.phase }
 		if previous?.entry == record.entry, previous?.state == record.state { return }
 		guard record.state == .saved, var entry = record.entry else { return }
@@ -754,10 +786,101 @@ final class JournalStore {
 		}
 	}
 
+	/// Deleting the memo proceeds whether or not ProcrastiMate deletes its tasks; a failed task deletion is reported.
 	@discardableResult
-	func deleteEntry(id entryID: UUID) async -> Bool {
-		await deleteEntries(ids: [entryID])
+	func deleteEntry(id entryID: UUID, deletingTasks: Bool = false) async -> Bool {
+		if deletingTasks, let procrastiMate {
+			let status = procrastiMate.status()
+			Task {
+				do {
+					guard case let .linked(credentials) = status else { throw ProcrastiMateError.unauthorized }
+					try await procrastiMate.delete(credentials, entryID)
+				} catch {
+					procrastiMateMessage = "The note was deleted, but its tasks are still in ProcrastiMate. Delete them there. "
+						+ error.localizedDescription
+				}
+			}
+		}
+		return await deleteEntries(ids: [entryID])
 	}
+
+	func asksAboutTasksOnDeletion(_ entryID: UUID) -> Bool {
+		MemoDeletionPrompt.asksAboutTasks(delivery: taskDeliveries[entryID], remote: remoteTasks[entryID])
+	}
+
+	func scheduleTaskDelivery(repair: Bool = false) {
+		taskDeliveryPending = true
+		taskDeliveryRepair = taskDeliveryRepair || repair
+		startTaskDelivery()
+	}
+
+	private func startTaskDelivery() {
+		guard let procrastiMate, hasLoadedJournal, !isDemoMode, taskDeliveryPending, taskDeliveryWorker == nil else { return }
+		taskDeliveryWake?.cancel()
+		let background = usesExternalServices
+			? UIApplication.shared.beginBackgroundTask(withName: "Send tasks to ProcrastiMate") {} : .invalid
+		taskDeliveryWorker = Task {
+			defer {
+				taskDeliveryWorker = nil
+				if background != .invalid { UIApplication.shared.endBackgroundTask(background) }
+				if taskDeliveryPending { startTaskDelivery() } else { scheduleTaskDeliveryRetry() }
+			}
+			while taskDeliveryPending, !Task.isCancelled {
+				taskDeliveryPending = false
+				let repair = taskDeliveryRepair
+				taskDeliveryRepair = false
+				let jobs = await repository.taskDeliveryJobs(repair: repair)
+				guard !jobs.isEmpty else { continue }
+				var status = procrastiMate.status()
+				for job in jobs {
+					do {
+						switch status {
+						case let .unavailable(problem):
+							if let record = try await repository.blockTasks(job, problem) { publish(record) }
+						case let .linked(credentials):
+							do {
+								let remote = try await procrastiMate.put(credentials,
+									MemoTasksRequest(memoID: job.id, recordedAt: job.recordedAt, tasks: job.tasks))
+								if let record = try await repository.acknowledgeTasks(job, remote: remote) { publish(record) }
+							} catch ProcrastiMateError.unauthorized {
+								status = .unavailable(.signedOut)
+								if let record = try await repository.blockTasks(job, .signedOut) { publish(record) }
+							} catch {
+								if let record = try await repository.failTasks(job,
+									message: "ProcrastiMate couldn’t be reached. These todos will be sent again.") { publish(record) }
+							}
+						}
+					} catch {
+						storageErrorMessage = "Task delivery progress couldn’t be saved. " + error.localizedDescription
+					}
+				}
+			}
+		}
+	}
+
+	private func scheduleTaskDeliveryRetry() {
+		taskDeliveryWake?.cancel()
+		guard procrastiMate != nil else { return }
+		taskDeliveryWake = Task {
+			guard let next = await repository.nextTaskDeliveryRetry() else { return }
+			do { try await Task.sleep(for: .seconds(max(0.05, next.timeIntervalSinceNow))) } catch { return }
+			scheduleTaskDelivery()
+		}
+	}
+
+	func refreshRemoteTasks(for entryID: UUID) async {
+		guard let procrastiMate, !isDemoMode, taskDeliveries[entryID]?.receipts.isEmpty == false,
+			case let .linked(credentials) = procrastiMate.status(),
+			let remote = try? await procrastiMate.list(credentials, entryID),
+			let record = try? await repository.cacheRemoteTasks(remote, for: entryID) else { return }
+		publish(record)
+	}
+
+	#if DEBUG
+	func waitForTaskDeliveryForContract() async {
+		while let worker = taskDeliveryWorker { await worker.value }
+	}
+	#endif
 
 	@discardableResult
 	func clearJournal() async -> Bool {
@@ -784,6 +907,8 @@ final class JournalStore {
 				pendingEdits.removeAll { $0.entryID == entryID }
 				deletedEntryIDs.insert(entryID)
 				processingStates.removeValue(forKey: entryID)
+				taskDeliveries.removeValue(forKey: entryID)
+				remoteTasks.removeValue(forKey: entryID)
 				failedNoteSaveIDs.remove(entryID)
 				updateUnsavedNoteStatus()
 				entryProcessingPhases.removeValue(forKey: entryID)

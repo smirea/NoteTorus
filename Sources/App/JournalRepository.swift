@@ -56,11 +56,6 @@ struct JournalLoad: Sendable {
 	var deletionReferences: Set<String>
 }
 
-struct ReminderBackfillResult: Sendable {
-	var records: [JournalRecord]
-	var issues: [String]
-}
-
 actor JournalRepository {
 	private let rootURL: URL
 	private let recordsURL: URL
@@ -307,30 +302,6 @@ actor JournalRepository {
 		return records[id]!
 	}
 
-	func backfillSkippedReminders(excluding excludedIDs: Set<UUID> = []) throws -> ReminderBackfillResult {
-		try requireLoaded()
-		var result = ReminderBackfillResult(records: [], issues: [])
-		for var record in records.values.sorted(by: { $0.id.uuidString < $1.id.uuidString }) {
-			if Task.isCancelled { break }
-			guard record.state == .saved, !excludedIDs.contains(record.id), let previous = record.processing,
-				previous.status == .complete, previous.skippedStages.contains(.reminders),
-				previous.completedStages.contains(.transcribe), let entry = record.entry,
-				!entry.transcript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, entry.calendarEvent != nil
-			else { continue }
-			var job = EntryProcessing(inputRevision: record.inputRevision, stage: .reminders)
-			job.completedStages = previous.completedStages
-			job.skippedStages = previous.skippedStages
-			record.processing = job
-			do {
-				try write(record)
-				result.records.append(records[record.id]!)
-			} catch {
-				result.issues.append("Reminder processing could not be queued for one note. " + error.localizedDescription)
-			}
-		}
-		return result
-	}
-
 	func retryProcessing(id: UUID) throws -> JournalRecord {
 		guard var record = records[id], record.state == .saved, var job = record.processing else {
 			throw RepositoryError.unavailableRecord
@@ -401,48 +372,6 @@ actor JournalRepository {
 		return records[record.id]!
 	}
 
-	func commitReminders(_ result: ReminderParsingResult?, lease: ProcessingLease) throws -> JournalRecord {
-		var record = try currentRecord(for: lease)
-		guard lease.stage == .reminders, result?.outcome.isComplete != false else { throw RepositoryError.staleProcessing }
-		if let result, var entry = record.entry {
-			let reconciled = ReminderIdentity.reconcile(generated: result.reminders, entry: entry)
-			entry.reminders = reconciled.reminders
-			entry.reminderHistory = reconciled.history
-			entry.reminderProcessedFeedbackIDs = reconciled.processedFeedbackIDs
-			entry.reminderModel = result.modelName
-			record.entry = entry
-		}
-		if result != nil { record.inputRevision += 1 }
-		advance(&record, after: .reminders)
-		if result == nil || result?.outcome == .skipped { record.processing?.skippedStages.insert(.reminders) }
-		try write(record)
-		return records[record.id]!
-	}
-
-	func commitReminderResolution(_ updates: [ReminderResolutionUpdate], source: JournalRecord) throws -> JournalRecord {
-		try Task.checkCancellation()
-		guard var record = records[source.id], record.state == .saved,
-			record.inputRevision == source.inputRevision, var entry = record.entry,
-			entry.reminders == source.entry?.reminders else { throw RepositoryError.staleProcessing }
-		for update in updates {
-			guard let index = entry.reminders.firstIndex(where: { $0.id == update.reminderID }) else {
-				throw RepositoryError.staleProcessing
-			}
-			if let occurrence = update.occurrence { entry.reminders[index].resolvedOccurrence = occurrence }
-			if entry.reminders[index].consumedAt == nil, let consumedAt = update.consumedAt {
-				entry.reminders[index].consumedAt = consumedAt
-			}
-			if let examples = update.examples, case var .fuzzy(selector) = entry.reminders[index].selector {
-				selector.examples = examples
-				entry.reminders[index].selector = .fuzzy(selector)
-			}
-		}
-		guard entry != record.entry else { return record }
-		record.entry = entry
-		try write(record)
-		return records[source.id]!
-	}
-
 	func savePartial(_ progress: TranscriptionProgress, lease: ProcessingLease) throws -> JournalRecord {
 		var record = try currentRecord(for: lease)
 		guard lease.stage == .transcribe else { throw RepositoryError.staleProcessing }
@@ -483,40 +412,14 @@ actor JournalRepository {
 		return records[record.id]!
 	}
 
-	func appendReminderFeedback(_ feedback: ReminderFeedback, to id: UUID) throws -> JournalRecord {
-		try Task.checkCancellation()
-		guard let record = records[id], record.state == .saved, let entry = record.entry else {
-			throw RepositoryError.unavailableRecord
-		}
-		if let existing = entry.reminderFeedback.first(where: { $0.id == feedback.id }) {
-			guard existing == feedback else { throw RepositoryError.feedbackConflict }
-			return record
-		}
-		return try apply(.feedback(feedback), to: id, checkingCancellation: true)
-	}
-
-	func apply(_ edit: JournalEdit, to id: UUID, checkingCancellation: Bool = false) throws -> JournalRecord {
+	func apply(_ edit: JournalEdit, to id: UUID) throws -> JournalRecord {
 		guard var record = records[id], record.state == .saved, var entry = record.entry else {
 			throw RepositoryError.unavailableRecord
 		}
 		edit.apply(to: &entry)
 		guard entry != record.entry else { return record }
 		record.entry = entry
-		switch edit {
-		case .feedback:
-			record.inputRevision += 1
-			var job = newProcessing(for: record)
-			job.stage = record.processing?.status == .complete ? .reminders : (record.processing?.stage ?? job.stage)
-			job.completedStages = record.processing?.completedStages ?? []
-			record.processing = job
-		case .removeReminder:
-			record.inputRevision += 1
-			record.processing?.inputRevision = record.inputRevision
-			record.processing?.attemptID = nil
-			if record.processing?.status == .running { record.processing?.status = .queued }
-		case .location: break
-		}
-		try write(record, checkingCancellation: checkingCancellation)
+		try write(record)
 		return records[id]!
 	}
 
@@ -544,8 +447,7 @@ actor JournalRepository {
 		switch stage {
 		case .finalizeAudio: job.stage = .transcribe
 		case .transcribe: job.stage = .reflect
-		case .reflect: job.stage = .reminders
-		case .reminders: job.status = .complete
+		case .reflect: job.status = .complete
 		}
 		record.processing = job
 	}
@@ -561,7 +463,7 @@ actor JournalRepository {
 				if record.processing == nil, let entry = record.entry {
 					var job = newProcessing(for: record)
 					if !["Processing recording", "Recovered recording"].contains(entry.headline), entry.transcript != "No transcript available." {
-						job.completedStages = [.transcribe, .reflect, .reminders]
+						job.completedStages = [.transcribe, .reflect]
 					}
 					if entry.audioFilename == nil {
 						job.status = .complete
@@ -571,7 +473,7 @@ actor JournalRepository {
 					} else if !RecordingAudioFormat.needsFinalization(entry.audioFilename!),
 						!["Processing recording", "Recovered recording"].contains(entry.headline) {
 						job.status = .complete
-						job.completedStages = [.transcribe, .reflect, .reminders]
+						job.completedStages = [.transcribe, .reflect]
 					}
 					record.processing = job
 					try write(record)
@@ -737,7 +639,7 @@ actor JournalRepository {
 		return record.ownedAudioFilenames
 	}
 
-	private func write(_ value: JournalRecord, checkingCancellation: Bool = false) throws {
+	private func write(_ value: JournalRecord) throws {
 		var record = value
 		let previous = records[record.id]
 		record.revision = (previous?.revision ?? record.revision) + 1
@@ -754,7 +656,6 @@ actor JournalRepository {
 		guard record.ownedAudioFilenames.allSatisfy(Self.isFilename),
 			record.entry?.audioFilename.map(Self.isFilename) ?? true else { throw RepositoryError.invalidRecord }
 		let data = try JSONEncoder().encode(record)
-		if checkingCancellation { try Task.checkCancellation() }
 		try data.write(to: recordsURL.appendingPathComponent("\(record.id.uuidString).json"),
 			options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
 		records[record.id] = record
@@ -817,10 +718,9 @@ private struct LegacyPendingRecording: Decodable {
 }
 
 enum RepositoryError: LocalizedError {
-	case invalidRecord, invalidAudio, unavailableRecord, notLoaded, staleProcessing, unsavedChanges, feedbackConflict
+	case invalidRecord, invalidAudio, unavailableRecord, notLoaded, staleProcessing, unsavedChanges
 	var errorDescription: String? {
 		switch self {
-		case .feedbackConflict: "This correction was already saved with different content. Record a new correction."
 		case .staleProcessing: "This processing attempt is no longer current."
 		case .unsavedChanges: "Your changes could not be saved. Use Try Again to save them."
 		case .invalidRecord: "The note metadata could not be read safely. Original files were preserved."

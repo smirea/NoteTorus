@@ -96,3 +96,9 @@ enum CalendarOccurrenceIdentity {
 		value.timeIntervalSinceReferenceDate.isFinite && value >= .distantPast && value <= .distantFuture
 	}
 }
+
+extension JournalCalendarEvent {
+	var focusKey: String {
+		CalendarOccurrenceIdentity.focusKey(for: self)
+	}
+}

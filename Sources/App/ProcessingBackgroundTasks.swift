@@ -163,9 +163,9 @@ final class ProcessingBackgroundTasks {
 	}
 
 	func update(jobs: [EntryProcessing]) {
-		let stages: [ProcessingStage] = [.finalizeAudio, .transcribe, .reflect, .reminders]
+		let stages: [ProcessingStage] = [.finalizeAudio, .transcribe, .reflect]
 		let completed = jobs.reduce(Int64(0)) { count, job in
-			count + (job.status == .complete ? 4 : Int64(stages.firstIndex(of: job.stage) ?? 0))
+			count + (job.status == .complete ? Int64(stages.count) : Int64(stages.firstIndex(of: job.stage) ?? 0))
 		}
 		let stage = jobs.first { $0.status == .running }?.stage
 		let subtitle: String
@@ -173,10 +173,9 @@ final class ProcessingBackgroundTasks {
 		case .finalizeAudio: subtitle = "Preparing audio"
 		case .transcribe: subtitle = "Transcribing"
 		case .reflect: subtitle = "Creating titles and summaries"
-		case .reminders: subtitle = "Looking for reminders"
 		case nil: subtitle = "Saving progress"
 		}
-		active?.update(completed: completed, total: Int64(jobs.count * 4), subtitle: subtitle)
+		active?.update(completed: completed, total: Int64(jobs.count * stages.count), subtitle: subtitle)
 	}
 
 	func finish(success: Bool) {

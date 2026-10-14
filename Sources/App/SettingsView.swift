@@ -49,20 +49,6 @@ struct SettingsView: View {
 
 					calendarSection.id("calendar-settings")
 
-					if store.settings.calendarSyncEnabled {
-						reminderSection.id("reminder-settings")
-					}
-
-					Section {
-						sectionHeading("Model")
-						NavigationLink {
-							ReminderBenchmarkView()
-						} label: {
-							Label("Reminder benchmark", systemImage: "gauge.with.dots.needle.67percent")
-						}
-					}
-					.listRowBackground(AppStyle.background)
-
 					Section {
 						sectionHeading("Data")
 						if store.cloudStatusMessage != nil {
@@ -93,9 +79,6 @@ struct SettingsView: View {
 					if ProcessInfo.processInfo.arguments.contains("-demo-settings-calendar") {
 						await Task.yield()
 						proxy.scrollTo("calendar-settings", anchor: .top)
-					} else if ProcessInfo.processInfo.arguments.contains(where: { $0.hasPrefix("-demo-reminder-") }) {
-						await Task.yield()
-						proxy.scrollTo("reminder-settings", anchor: .center)
 					} else if ProcessInfo.processInfo.arguments.contains("-demo-cloud-pending")
 						|| ProcessInfo.processInfo.arguments.contains("-demo-configuration-damaged") {
 						await Task.yield()
@@ -158,34 +141,6 @@ struct SettingsView: View {
 						isIncluded: calendarBinding(for: calendar)
 					)
 				}
-			}
-		}
-		.listRowBackground(AppStyle.background)
-	}
-
-	private var reminderSection: some View {
-		Section {
-			sectionHeading("Event reminders")
-			Toggle("Event reminders", isOn: settingBinding(\.eventRemindersEnabled))
-
-			if store.settings.eventRemindersEnabled {
-				Toggle("Live Activities", isOn: settingBinding(\.eventReminderLiveActivitiesEnabled))
-				Picker("Start before event", selection: settingBinding(\.eventReminderLeadMinutes)) {
-					Text("15 minutes").tag(15)
-					Text("30 minutes").tag(30)
-					Text("1 hour").tag(60)
-					Text("90 minutes").tag(90)
-					Text("2 hours").tag(120)
-				}
-			}
-			if store.canRetryReminderDelivery {
-				Button("Try Reminders Again") { Task { await store.retryReminderDelivery() } }
-			}
-		} footer: {
-			VStack(alignment: .leading, spacing: 6) {
-				if let message = store.reminderSchedulingMessage { Text(message) }
-				if let message = store.reminderPresentationMessage { Text(message) }
-				if let message = store.reminderBackfillMessage { Text(message) }
 			}
 		}
 		.listRowBackground(AppStyle.background)

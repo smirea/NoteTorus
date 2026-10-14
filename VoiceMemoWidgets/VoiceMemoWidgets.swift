@@ -7,7 +7,6 @@ struct VoiceMemoWidgets: WidgetBundle {
 	var body: some Widget {
 		StartRecordingWidget()
 		RecordingLiveActivity()
-		ReminderLiveActivity()
 	}
 }
 
@@ -110,84 +109,6 @@ struct RecordingLiveActivity: Widget {
 			}
 			.widgetURL(context.attributes.recordingURL)
 		}
-	}
-}
-
-struct ReminderLiveActivity: Widget {
-	var body: some WidgetConfiguration {
-		ActivityConfiguration(for: ReminderActivityAttributes.self) { context in
-			Link(destination: entryURL(context.attributes.sourceEntryID)) {
-				HStack(alignment: .top, spacing: 13) {
-					VoiceMemoAppIcon(size: 38)
-
-					VStack(alignment: .leading, spacing: 5) {
-						Text(context.attributes.eventTitle)
-							.font(.headline)
-							.lineLimit(1)
-						ForEach(Array(context.state.reminderTexts.prefix(2).enumerated()), id: \.offset) { _, reminder in
-							Label(reminder, systemImage: "circle")
-								.font(.subheadline)
-								.lineLimit(1)
-						}
-						if context.state.hiddenCount(visibleLimit: 2) > 0 {
-							Text("+\(context.state.hiddenCount(visibleLimit: 2)) more")
-								.font(.caption)
-								.foregroundStyle(.secondary)
-						}
-					}
-
-					Spacer(minLength: 0)
-
-					Text(context.attributes.startDate, style: .time)
-						.font(.subheadline.weight(.semibold))
-						.foregroundStyle(.secondary)
-				}
-				.padding(.horizontal, 16)
-				.padding(.vertical, 14)
-			}
-			.activityBackgroundTint(.black)
-			.activitySystemActionForegroundColor(.white)
-		} dynamicIsland: { context in
-			DynamicIsland {
-				DynamicIslandExpandedRegion(.leading) {
-					VoiceMemoAppIcon(size: 32)
-				}
-				DynamicIslandExpandedRegion(.center) {
-					VStack(alignment: .leading, spacing: 2) {
-						Text(context.attributes.eventTitle)
-							.font(.headline)
-							.lineLimit(1)
-						Text(context.state.reminderTexts.first ?? "Reminders ready")
-							.font(.caption)
-							.foregroundStyle(.secondary)
-							.lineLimit(2)
-						if context.state.hiddenCount(visibleLimit: 1) > 0 {
-							Text("+\(context.state.hiddenCount(visibleLimit: 1)) more")
-								.font(.caption2)
-								.foregroundStyle(.secondary)
-						}
-					}
-				}
-				DynamicIslandExpandedRegion(.trailing) {
-					Text(context.attributes.startDate, style: .time)
-						.font(.caption.weight(.semibold))
-				}
-			} compactLeading: {
-				Image(systemName: "checklist")
-					.foregroundStyle(.orange)
-			} compactTrailing: {
-				Text(context.attributes.startDate, style: .time)
-					.font(.caption2)
-			} minimal: {
-				Image(systemName: "checklist")
-					.foregroundStyle(.orange)
-			}
-			.widgetURL(entryURL(context.attributes.sourceEntryID))
-		}
-	}
-
-	private func entryURL(_ id: UUID) -> URL {
-		URL(string: "myvoicememo://entry?id=\(id.uuidString)")!
 	}
 }
 

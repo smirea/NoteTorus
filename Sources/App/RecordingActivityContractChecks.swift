@@ -65,7 +65,7 @@ enum RecordingActivityContractChecks {
 		gate.release()
 		await manager.waitUntilSettled()
 		try expect(backend.requests.count == 1 && backend.live.first?.attributes.captureID == second,
-			"A stale reminder-budget preparation completion must never request the discarded capture")
+			"A stale preparation completion must never request the discarded capture")
 		manager.end(captureID: second, state: state(elapsed: 0, status: .stopped))
 		await manager.waitUntilSettled()
 	}

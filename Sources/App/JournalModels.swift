@@ -108,12 +108,7 @@ struct JournalEntry: Identifiable, Codable, Hashable, Sendable {
 		case calendarEvent
 		case summaryModel
 		case transcriptModel
-		case reminders
-		case reminderFeedback
-		case reminderModel
 		case analysis
-		case reminderHistory
-		case reminderProcessedFeedbackIDs
 	}
 
 	let id: UUID
@@ -127,12 +122,7 @@ struct JournalEntry: Identifiable, Codable, Hashable, Sendable {
 	var calendarEvent: JournalCalendarEvent?
 	var summaryModel: String?
 	var transcriptModel: String?
-	var reminders: [EventReminderRule]
-	var reminderFeedback: [ReminderFeedback]
-	var reminderModel: String?
 	var analysis: MemoAnalysis?
-	var reminderHistory: [EventReminderRule]
-	var reminderProcessedFeedbackIDs: Set<UUID>
 
 	init(
 		id: UUID = UUID(),
@@ -146,12 +136,7 @@ struct JournalEntry: Identifiable, Codable, Hashable, Sendable {
 		calendarEvent: JournalCalendarEvent? = nil,
 		summaryModel: String? = nil,
 		transcriptModel: String? = nil,
-		reminders: [EventReminderRule] = [],
-		reminderFeedback: [ReminderFeedback] = [],
-		reminderModel: String? = nil,
-		analysis: MemoAnalysis? = nil,
-		reminderHistory: [EventReminderRule] = [],
-		reminderProcessedFeedbackIDs: Set<UUID> = []
+		analysis: MemoAnalysis? = nil
 	) {
 		self.id = id
 		self.createdAt = createdAt
@@ -164,12 +149,7 @@ struct JournalEntry: Identifiable, Codable, Hashable, Sendable {
 		self.calendarEvent = calendarEvent
 		self.summaryModel = summaryModel
 		self.transcriptModel = transcriptModel
-		self.reminders = reminders
-		self.reminderFeedback = reminderFeedback
-		self.reminderModel = reminderModel
 		self.analysis = analysis
-		self.reminderHistory = reminderHistory
-		self.reminderProcessedFeedbackIDs = reminderProcessedFeedbackIDs
 	}
 
 	init(from decoder: Decoder) throws {
@@ -185,13 +165,7 @@ struct JournalEntry: Identifiable, Codable, Hashable, Sendable {
 		calendarEvent = try container.decodeIfPresent(JournalCalendarEvent.self, forKey: .calendarEvent)
 		summaryModel = try container.decodeIfPresent(String.self, forKey: .summaryModel)
 		transcriptModel = try container.decodeIfPresent(String.self, forKey: .transcriptModel)
-		reminders = try container.decodeIfPresent([EventReminderRule].self, forKey: .reminders) ?? []
-		reminderFeedback = try container.decodeIfPresent([ReminderFeedback].self, forKey: .reminderFeedback) ?? []
-		reminderModel = try container.decodeIfPresent(String.self, forKey: .reminderModel)
 		analysis = try container.decodeIfPresent(MemoAnalysis.self, forKey: .analysis)
-		reminderHistory = try container.decodeIfPresent([EventReminderRule].self, forKey: .reminderHistory) ?? []
-		reminderProcessedFeedbackIDs = try container.decodeIfPresent(Set<UUID>.self, forKey: .reminderProcessedFeedbackIDs)
-			?? Set(reminderFeedback.map(\.id))
 	}
 }
 
@@ -268,7 +242,6 @@ enum EntryProcessingPhase: Equatable, Sendable {
 	case transcribing
 	case queued
 	case reflecting
-	case reminders
 	case complete
 
 	var title: String {
@@ -281,7 +254,6 @@ enum EntryProcessingPhase: Equatable, Sendable {
 		case .transcribing: "Transcribing"
 		case .queued: "Waiting"
 		case .reflecting: "Analyzing"
-		case .reminders: "Finding reminders"
 		case .complete: "Ready"
 		}
 	}
@@ -317,29 +289,6 @@ extension JournalEntry {
 			location: "Lakefront Trail",
 			isRecurring: true
 		)
-		let nextMorningRun = JournalCalendarEvent(
-			id: "demo-morning-run-next",
-			externalIdentifier: "demo-morning-run-series",
-			calendarIdentifier: "demo-personal",
-			calendarTitle: "Personal",
-			title: "Morning run",
-			startDate: date(2026, 7, 26, 8, 0),
-			endDate: date(2026, 7, 26, 9, 0),
-			isAllDay: false,
-			location: "Lakefront Trail",
-			isRecurring: true
-		)
-		let eveningRun = JournalCalendarEvent(
-			id: "demo-evening-run",
-			calendarIdentifier: "demo-personal",
-			calendarTitle: "Personal",
-			title: "Evening run",
-			startDate: date(2026, 7, 25, 18, 30),
-			endDate: date(2026, 7, 25, 19, 30),
-			isAllDay: false,
-			location: "Lakefront Trail"
-		)
-		let runSeries = EventSeriesReference(event: morningRun)
 
 		return [
 			JournalEntry(
@@ -351,51 +300,7 @@ extension JournalEntry {
 				location: JournalLocation(latitude: 41.8781, longitude: -87.6298, city: "Chicago"),
 				calendarEvent: morningRun,
 				summaryModel: "SystemLanguageModel.default",
-				transcriptModel: "Apple Speech · en-US",
-				reminders: [
-					EventReminderRule(
-						text: "Bring electrolytes",
-						motivation: "You faded early during the last run.",
-						evidence: "Next time I should bring electrolytes.",
-						selector: .series(runSeries),
-						occurrencePolicy: .everyMatch,
-						createdAt: date(2026, 7, 12, 8, 47)
-					),
-					EventReminderRule(
-						text: "Ask Maya which dentist she recommended",
-						motivation: "You wanted to follow up with Maya at the next run.",
-						evidence: "I should also ask Maya which dentist she recommended.",
-						selector: .series(runSeries),
-						occurrencePolicy: .nextMatch,
-						createdAt: date(2026, 7, 12, 8, 47)
-					),
-					EventReminderRule(
-						text: "Wear the red shorts",
-						motivation: "You want them to be easy to spot at morning group runs.",
-						evidence: "For morning group runs this month I want to wear the red shorts.",
-						selector: .fuzzy(FuzzyEventSelector(
-							semanticDescription: "group run",
-							timeBucket: .morning,
-							locationDescription: nil,
-							examples: [
-								ReminderMatchExample(
-									event: nextMorningRun,
-									matches: true,
-									reason: "A morning group run."
-								),
-								ReminderMatchExample(
-									event: eveningRun,
-									matches: false,
-									reason: "The event is in the evening."
-								)
-							]
-						)),
-						occurrencePolicy: .everyMatch,
-						createdAt: date(2026, 7, 12, 8, 47),
-						expiresAt: date(2026, 8, 12, 8, 47)
-					)
-				],
-				reminderModel: "SystemLanguageModel.default · guided"
+				transcriptModel: "Apple Speech · en-US"
 			),
 			JournalEntry(
 				createdAt: date(2026, 7, 12, 7, 21),

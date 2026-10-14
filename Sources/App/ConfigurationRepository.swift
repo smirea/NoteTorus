@@ -238,9 +238,6 @@ actor ConfigurationRepository {
 		apply(\.calendarSyncEnabled)
 		apply(\.includedCalendarIdentifiers)
 		apply(\.preferredCalendarApp)
-		apply(\.eventRemindersEnabled)
-		apply(\.eventReminderLiveActivitiesEnabled)
-		apply(\.eventReminderLeadMinutes)
 		if keyEdited || current.elevenLabsAPIKey != baseline.elevenLabsAPIKey { merged.elevenLabsAPIKey = current.elevenLabsAPIKey }
 		let old = Dictionary(baseline.locations.map { ($0.id, $0) }, uniquingKeysWith: { _, last in last })
 		let changed = Dictionary(current.locations.filter { old[$0.id] != $0 }.map { ($0.id, $0) }, uniquingKeysWith: { _, last in last })

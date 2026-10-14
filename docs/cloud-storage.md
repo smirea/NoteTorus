@@ -4,7 +4,7 @@ Local note manifests and audio remain authoritative. iCloud Drive is a browsable
 
 ## Committed changes
 
-Each note manifest has a content revision separate from its processing attempt and reminder-source revisions. Only changes to exported content or deletion advance the content revision. An export acknowledgment must match the current content revision and saved/deleted state; an old result cannot clear a newer edit or tombstone. Acknowledgments and retry bookkeeping do not generate another export.
+Each note manifest has a content revision separate from its processing attempt and input revisions. Only changes to exported content or deletion advance the content revision. An export acknowledgment must match the current content revision and saved/deleted state; an old result cannot clear a newer edit or tombstone. Acknowledgments and retry bookkeeping do not generate another export.
 
 Successful audio and metadata receipts retain file signatures without duplicating the transcript. A directory scan validates those receipts, so an unchanged repair pass after restart performs no audio copy or note JSON write. Missing or replaced files are repaired. A changed title rewrites its JSON only.
 

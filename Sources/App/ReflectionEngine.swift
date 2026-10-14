@@ -367,8 +367,8 @@ enum ReflectionEngine {
 		let range = NSRange(generated.startIndex..., in: generated)
 		return expression.matches(in: generated, range: range).contains { match in
 			guard let matchRange = Range(match.range, in: generated) else { return false }
-			return !transcript.reminderNormalized.contains(
-				String(generated[matchRange]).reminderNormalized
+			return !transcript.foldedWords.contains(
+				String(generated[matchRange]).foldedWords
 			)
 		}
 	}
@@ -377,5 +377,16 @@ enum ReflectionEngine {
 private extension String {
 	var nonempty: String? {
 		isEmpty ? nil : self
+	}
+}
+
+extension String {
+	var foldedWords: String {
+		folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+			.unicodeScalars
+			.map { CharacterSet.alphanumerics.contains($0) ? String($0) : " " }
+			.joined()
+			.split(whereSeparator: \.isWhitespace)
+			.joined(separator: " ")
 	}
 }

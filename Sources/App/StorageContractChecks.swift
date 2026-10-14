@@ -195,16 +195,13 @@ enum StorageContractChecks {
 	private static func storeMutationChecks() async throws {
 		let root = try temporaryRoot()
 		defer { try? FileManager.default.removeItem(at: root) }
-		let reminder = EventReminderRule(text: "Bring your notebook", motivation: "Capture meeting notes", evidence: "Bring my notebook",
-			selector: .fuzzy(FuzzyEventSelector(semanticDescription: "Team meeting", timeBucket: .any, locationDescription: nil, examples: [])),
-			occurrencePolicy: .everyMatch)
-		var entry = audioEntry(title: "Committed reminder")
-		entry.reminders = [reminder]
+		let entry = audioEntry(title: "Committed note")
+		let location = JournalLocation(latitude: 41.88, longitude: -87.63, city: "Chicago")
 		let store = try await makeStore(entries: [entry], root: root)
 		let preservedURL = try blockManifest(entry.id, root: root)
-		store.removeReminder(entryID: entry.id, reminderID: reminder.id)
+		store.persist(.location(location), entryID: entry.id)
 		await store.waitForPendingWrites()
-		try expect(store.entry(id: entry.id)?.reminders.isEmpty == true, "A failed edit must remain available in the UI for retry")
+		try expect(store.entry(id: entry.id)?.location == location, "A failed edit must remain available in the UI for retry")
 		try expect(store.hasUnsavedNoteChanges && store.storageErrorMessage != nil, "A failed edit must remain explicitly unsaved")
 		let committed = await store.committedEntriesForExport()
 		try expect(committed == [entry], "Export must use the last committed note, excluding failed optimistic edits")
@@ -220,19 +217,19 @@ enum StorageContractChecks {
 		let decoder = JSONDecoder()
 		decoder.dateDecodingStrategy = .iso8601
 		let cloudEntry = try decoder.decode(JournalEntry.self, from: Data(contentsOf: exportedURL))
-		try expect(cloudEntry.reminders.map(\.id) == [reminder.id] && cloudEntry.reminderFeedback.isEmpty, "iCloud metadata must exclude an uncommitted reminder removal and its feedback")
+		try expect(cloudEntry.location == nil, "iCloud metadata must exclude an uncommitted edit")
 		let sharedEntry = try decoder.decode(JournalEntry.self, from: committed[0].jsonData())
-		try expect(sharedEntry.reminders.map(\.id) == [reminder.id], "Share JSON built from the committed snapshot must retain the durable reminder")
+		try expect(sharedEntry.id == entry.id && sharedEntry.location == nil, "Share JSON built from the committed snapshot must exclude the uncommitted edit")
 
 		try restoreManifest(entry.id, root: root, preservedURL: preservedURL)
 		await store.retrySavingChanges()
 		await store.waitForPendingWrites()
 		try expect(!store.hasUnsavedNoteChanges, "A successful retry must clear the unsaved state")
 		let retried = await store.committedEntriesForExport()
-		try expect(retried.count == 1 && retried[0].reminders.isEmpty && retried[0].reminderFeedback.count == 1, "Retry must commit the retained edit exactly once")
+		try expect(retried.count == 1 && retried[0].location == location, "Retry must commit the retained edit")
 		await store.retrySavingChanges()
 		let reloaded = try await JournalRepository(rootURL: root).load()
-		try expect(reloaded.entries == retried, "Committed retry results must survive relaunch without duplicate feedback")
+		try expect(reloaded.entries == retried, "Committed retry results must survive relaunch")
 	}
 
 	private static func audioEntry(title: String) -> JournalEntry {
@@ -249,7 +246,6 @@ enum StorageContractChecks {
 		try await store.waitUntilLoaded()
 		await store.waitForConfigurationWritesForContract()
 		store.updateSetting(\.calendarSyncEnabled, false)
-		store.updateSetting(\.eventRemindersEnabled, false)
 		await store.waitForConfigurationWritesForContract()
 		return store
 	}

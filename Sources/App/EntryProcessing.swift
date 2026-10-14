@@ -1,13 +1,12 @@
 import Foundation
 
 enum ProcessingStage: String, Codable, Hashable, Sendable {
-	case finalizeAudio, transcribe, reflect, reminders
+	case finalizeAudio, transcribe, reflect
 	var phase: EntryProcessingPhase {
 		switch self {
 		case .finalizeAudio: .finalizing
 		case .transcribe: .transcribing
 		case .reflect: .reflecting
-		case .reminders: .reminders
 		}
 	}
 }
@@ -45,11 +44,19 @@ struct EntryProcessing: Codable, Hashable, Sendable {
 		requestID = try values.decode(UUID.self, forKey: .requestID)
 		requestedAt = try values.decode(Date.self, forKey: .requestedAt)
 		inputRevision = try values.decode(Int.self, forKey: .inputRevision)
-		stage = try values.decode(ProcessingStage.self, forKey: .stage)
+		// Records written before reminders were removed can name a stage that no longer exists.
+		let rawStage = try values.decode(String.self, forKey: .stage)
 		status = try values.decode(Status.self, forKey: .status)
 		attemptID = try values.decodeIfPresent(UUID.self, forKey: .attemptID)
-		completedStages = try values.decodeIfPresent(Set<ProcessingStage>.self, forKey: .completedStages) ?? []
-		skippedStages = try values.decodeIfPresent(Set<ProcessingStage>.self, forKey: .skippedStages) ?? []
+		completedStages = Set((try values.decodeIfPresent([String].self, forKey: .completedStages) ?? []).compactMap(ProcessingStage.init(rawValue:)))
+		skippedStages = Set((try values.decodeIfPresent([String].self, forKey: .skippedStages) ?? []).compactMap(ProcessingStage.init(rawValue:)))
+		if let known = ProcessingStage(rawValue: rawStage) {
+			stage = known
+		} else {
+			stage = .reflect
+			status = .complete
+			attemptID = nil
+		}
 		failureKind = try values.decodeIfPresent(ProcessingFailureKind.self, forKey: .failureKind)
 		partialTranscript = try values.decodeIfPresent(TranscriptionProgress.self, forKey: .partialTranscript)
 		failure = try values.decodeIfPresent(String.self, forKey: .failure)
@@ -85,12 +92,11 @@ struct ProcessingLease: Hashable, Sendable {
 enum ProcessingDeadline {
 	static func seconds(stage: ProcessingStage, entry: JournalEntry) -> TimeInterval {
 		let duration = entry.duration.isFinite ? max(0, entry.duration) : 0
-		let context = Double(entry.transcript.utf8.count + entry.reminderFeedback.reduce(0) { $0 + $1.text.utf8.count })
+		let context = Double(entry.transcript.utf8.count)
 		switch stage {
 		case .finalizeAudio: return max(120, duration * 2 + 60)
 		case .transcribe: return max(180, duration * 3 + 120)
 		case .reflect: return max(180, context / 20 + 120)
-		case .reminders: return max(300, context / 10 + 180)
 		}
 	}
 }
@@ -113,7 +119,7 @@ actor ProcessingTemporaryFiles {
 			var issues: [String] = []
 			for file in files {
 				let stem = file.deletingPathExtension().lastPathComponent
-				let patterns = [("speech-input-", "caf"), ("elevenlabs-", "multipart"), ("reminder-feedback-", "m4a")]
+				let patterns = [("speech-input-", "caf"), ("elevenlabs-", "multipart")]
 				guard patterns.contains(where: { prefix, ext in
 					guard file.pathExtension == ext, stem.hasPrefix(prefix) else { return false }
 					let id = String(stem.dropFirst(prefix.count))
@@ -137,26 +143,10 @@ struct ProcessingWork: Sendable {
 
 enum JournalEdit: Sendable {
 	case location(JournalLocation)
-	case feedback(ReminderFeedback)
-	case removeReminder(UUID, ReminderFeedback)
-
-	var changesReminderSource: Bool {
-		if case .location = self { return false }
-		return true
-	}
 
 	func apply(to entry: inout JournalEntry) {
 		switch self {
 		case let .location(value): entry.location = value
-		case let .feedback(value):
-			if !entry.reminderFeedback.contains(where: { $0.id == value.id }) { entry.reminderFeedback.append(value) }
-		case let .removeReminder(id, feedback):
-			if let removed = entry.reminders.first(where: { $0.id == id }) {
-				entry.reminderHistory.removeAll { $0.id == id }
-				entry.reminderHistory.append(removed)
-			}
-			entry.reminders.removeAll { $0.id == id }
-			if !entry.reminderFeedback.contains(where: { $0.id == feedback.id }) { entry.reminderFeedback.append(feedback) }
 		}
 	}
 }
@@ -164,15 +154,10 @@ enum JournalEdit: Sendable {
 struct ProcessingServices: Sendable {
 	var transcribe: @Sendable (URL, Bool, String?, @escaping @Sendable (TranscriptionProgress) -> Void) async throws -> TranscriptionResult
 	var reflect: @Sendable (String, Bool) async -> ReflectionResult
-	var reminders: @Sendable (JournalEntry) async -> ReminderParsingResult
 
 	static let live = ProcessingServices(
 		transcribe: { url, preferred, key, update in
 			try await AudioTranscriber.transcribe(url: url, preferElevenLabs: preferred, elevenLabsAPIKey: key, onUpdate: update)
 		},
-		reflect: { await ReflectionEngine.reflect(on: $0, includeSummary: $1) },
-		reminders: { entry in
-			await ReminderEngine.parse(transcript: entry.transcript, sourceEvent: entry.calendarEvent,
-				createdAt: entry.createdAt, currentReminders: entry.reminders, feedback: entry.reminderFeedback)
-		})
+		reflect: { await ReflectionEngine.reflect(on: $0, includeSummary: $1) })
 }

@@ -20,7 +20,6 @@ enum ProcessingWorkerContractChecks {
 		let entry = try seed(root: root)
 		let probe = Probe()
 		let store = JournalStore(storageRootURL: root, processingServices: services(probe))
-		store.updateSetting(\.eventRemindersEnabled, false)
 		defer { try? FileManager.default.removeItem(at: root) }
 		do {
 			try await store.waitUntilLoaded()
@@ -59,7 +58,6 @@ enum ProcessingWorkerContractChecks {
 		let entry = try seed(root: root)
 		let probe = Probe()
 		let store = JournalStore(storageRootURL: root, processingServices: services(probe))
-		store.updateSetting(\.eventRemindersEnabled, false)
 		defer { try? FileManager.default.removeItem(at: root) }
 		do {
 			try await store.waitUntilLoaded()
@@ -93,7 +91,6 @@ enum ProcessingWorkerContractChecks {
 		let second = try seed(root: root, append: true)
 		let probe = Probe()
 		let store = JournalStore(storageRootURL: root, processingServices: services(probe))
-		store.updateSetting(\.eventRemindersEnabled, false)
 		defer { try? FileManager.default.removeItem(at: root) }
 		do {
 			try await store.waitUntilLoaded()
@@ -117,8 +114,7 @@ enum ProcessingWorkerContractChecks {
 
 	private static func services(_ probe: Probe) -> ProcessingServices {
 		ProcessingServices(transcribe: { _, _, _, update in try await probe.transcribe(update) },
-			reflect: { transcript, _ in await probe.reflect(transcript) },
-			reminders: { _ in ReminderParsingResult(reminders: [], modelName: "Fixture", outcome: .complete) })
+			reflect: { transcript, _ in await probe.reflect(transcript) })
 	}
 
 	private actor Probe {

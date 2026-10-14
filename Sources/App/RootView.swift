@@ -22,7 +22,6 @@ enum AppDeepLink: Equatable, Sendable {
 
 private enum AppRoute: Hashable {
 	case entry(UUID)
-	case reminderBenchmark
 	case review
 }
 
@@ -41,14 +40,8 @@ struct RootView: View {
 		if arguments.contains("-demo-entry"), let entry = store.entries.first(where: { Calendar.current.component(.day, from: $0.createdAt) == 11 }) {
 			_path = State(initialValue: [.entry(entry.id)])
 		}
-		if arguments.contains("-demo-reminders"), let entry = store.entries.first(where: { !$0.reminders.isEmpty }) {
-			_path = State(initialValue: [.entry(entry.id)])
-		}
 		if arguments.contains("-demo-review") {
 			_path = State(initialValue: [.review])
-		}
-		if arguments.contains("-demo-reminder-benchmark") {
-			_path = State(initialValue: [.reminderBenchmark])
 		}
 		if arguments.contains("-demo-settings") {
 			_showsSettings = State(initialValue: true)
@@ -71,8 +64,6 @@ struct RootView: View {
 					if let entry = store.entry(id: entryID) {
 						EntryView(store: store, entry: entry)
 					}
-				case .reminderBenchmark:
-					ReminderBenchmarkView()
 				case .review:
 					ReviewView(store: store, date: .now)
 				}

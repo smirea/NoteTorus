@@ -1,6 +1,6 @@
 # Reliability and architecture review
 
-The app should treat captured audio as the primary product. Transcription, summaries, reminders, cloud exports, waveforms, and system presentations are optional projections of saved recordings. Most failures in the original implementation came from letting these layers share lifetimes or infer success from incomplete state.
+The app should treat captured audio as the primary product. Transcription, summaries, cloud exports, waveforms, and system presentations are optional projections of saved recordings. Most failures in the original implementation came from letting these layers share lifetimes or infer success from incomplete state.
 
 ## Fundamental decisions
 
@@ -10,26 +10,21 @@ The app should treat captured audio as the primary product. Transcription, summa
 | One library JSON document and optimistic save/delete | One damaged entry could hide the library; failed writes could claim success or resurrect deleted audio | Independent atomic manifests, stable recording IDs, preserved migration originals, and durable deletion tombstones |
 | A recording container needed a clean finish to be playable | Abrupt exit left audio that metadata alone could not recover | Streaming AAC ADTS, native M4A remux, complete validation, publish-then-manifest commit, source cleanup last |
 | Generated titles and in-memory tasks represented processing progress | Interrupted work stayed incomplete or repeated completed work; canceled native requests overlapped replacements | Durable stage/request/attempt/source records; atomic output plus advancement; one worker and permits held until actual native cleanup |
-| Async output was trusted after its input changed | Old analysis, feedback, pins, or activities could replace current state | Narrow edits, saved source revisions, immediate intent invalidation, and exact durable receipts |
-| Every update repeated derived work | Repeated directory scans, file rewrites, waveform decoding, and model calls competed with capture | Incremental export index and receipts, bounded waveform/match caches, coalesced workers, capture priority |
+| Async output was trusted after its input changed | Old analysis or activities could replace current state | Narrow edits, saved source revisions, immediate intent invalidation, and exact durable receipts |
+| Every update repeated derived work | Repeated directory scans, file rewrites, waveform decoding, and model calls competed with capture | Incremental export index and receipts, bounded waveform caches, coalesced workers, capture priority |
 | Remote configuration failure resembled absence | Unavailable cloud state could be overwritten with defaults | Explicit absent/unavailable/damaged/conflicting states, provisional local edits, conditional remote creation |
-| Model prompts assumed inputs fit | Long memos or late corrections could be omitted or exceed context | Full request budgets, ordered complete passages, bounded reduction, source-grounded correction passes |
-| Model-generated rule identity owned reminder history | Rewording could re-arm a consumed reminder or undo removal | Repository reconciliation of stable identities, archived history, conservative correction provenance |
-| Event IDs and short title prefixes were treated as proof | Wrong recurring instance, cross-calendar match, or unrelated event | Exact occurrence selection, ambiguity rejection, per-occurrence expiry, complete normalized names |
-| An activity key represented its whole presentation | Changed times, lead, title, or secondary source could stay stale | Full persisted descriptors, serialized reconciliation, early retirement, bounded scheduling horizon, visible retry |
+| Model prompts assumed inputs fit | Long memos could be omitted or exceed context | Full request budgets, ordered complete passages, bounded reduction |
+| Event IDs and short title prefixes were treated as proof | Wrong recurring instance, cross-calendar match, or unrelated event | Exact occurrence selection and ambiguity rejection |
 | Recording activities ran independently of capture | A killed process could leave an indefinitely advancing recording timer | Capture-specific ownership, confirmed progress, bounded estimated timers, orphan cleanup on relaunch |
-| Feedback and benchmarks had no clear submission lifetime | Uncancelable work, lost retry audio, duplicate corrections, misleading accuracy | Owned sessions, retained audio/text, idempotent receipts, typed partial results and assessed-only metrics |
 | The weekly graph used invented values | A visual suggested a meaningful trend without a measurement | Daily minutes from available saved recordings, grouped by recording date across seven local calendar days |
 
 These changes preserve a small native app: no new service or third-party dependency is required. The repository owns durable truth, the store coordinates optional work, and each screen owns its temporary interaction. A canceled caller can stop waiting without pretending an uncooperative native service has finished.
 
-The key owners are [`RecordingSession`](../Sources/App/RecordingSession.swift) and [`AudioRecorder`](../Sources/App/AudioRecorder.swift) for capture; [`JournalRepository`](../Sources/App/JournalRepository.swift) for durable records; [`ServiceAdmission`](../Sources/App/ServiceAdmission.swift) and [`JournalStore`](../Sources/App/JournalStore.swift) for optional work; [`ICloudDriveMirror`](../Sources/App/ICloudDriveMirror.swift) for exports; and [`ReminderEngine`](../Sources/App/ReminderEngine.swift), [`CalendarOccurrenceIdentity`](../Sources/App/CalendarOccurrenceIdentity.swift), and the activity managers for derived delivery. [`FEATURES.md`](../FEATURES.md) is the behavioral regression contract.
+The key owners are [`RecordingSession`](../Sources/App/RecordingSession.swift) and [`AudioRecorder`](../Sources/App/AudioRecorder.swift) for capture; [`JournalRepository`](../Sources/App/JournalRepository.swift) for durable records; [`ServiceAdmission`](../Sources/App/ServiceAdmission.swift) and [`JournalStore`](../Sources/App/JournalStore.swift) for optional work; [`ICloudDriveMirror`](../Sources/App/ICloudDriveMirror.swift) for exports; and [`CalendarOccurrenceIdentity`](../Sources/App/CalendarOccurrenceIdentity.swift) for attached events. [`FEATURES.md`](../FEATURES.md) is the behavioral regression contract.
 
 ## Performance evidence
 
 An unchanged 400-note export fixture went from 800 directory scans and 400 JSON writes in about 2.583 seconds to one scan and zero writes in about 0.0986 seconds. A repeated five-minute waveform load went from a full decode in about 0.086 seconds to a cache lookup in about 0.000126 seconds, with identical 52-bin output. The first waveform decode still costs about 0.102 seconds. These are local fixture measurements, not physical-device latency or iCloud upload measurements.
-
-Matching caches only completed decisions under their full inputs and environment. Failed or canceled inference stays retryable. A one-time reminder stops at its first safely proven occurrence; an earlier unknown can block selection, while irrelevant historical or later uncertainty cannot. An independent retirement worker removes obsolete presentations even if old inference is still cleaning up.
 
 Weekly Review waits for library loading before computing totals. An unreadable library reports unavailable totals; it cannot silently become an empty zero week. Completed local metrics remain visible when optional reflection fails.
 
@@ -37,15 +32,13 @@ Weekly Review waits for library loading before computing totals. An unreadable l
 
 - Local storage is authoritative. iCloud files are browsable exports and configuration restoration; they are not a multi-device note merge protocol. A local provider write does not prove another device received it.
 - Audio recovery retains complete written packets, but codec/filesystem buffering can lose the final tail. Keeping the source through validated publication costs temporary disk space and avoids claiming an unreadable recording is saved.
-- Reminders favor avoiding incorrect delivery. Ambiguous occurrence identities or ambiguous retired paraphrases wait instead of selecting a plausible substitute. A one-time rule being marked consumed after its pinned occurrence ends does not prove that an alert was delivered.
-- Reminder activities cover the next two groups with trigger times within 24 hours. Additional groups need a later app refresh. ActivityKit acceptance, OS quotas, alert delivery, and long-term replenishment are separate concerns.
 - iOS can delay stale Live Activity redraw. A bounded timer and explicit last-confirmed wording prevent an unlimited recording claim; reopening clears activities from the previous process.
 - Native work that never exits retains its quarantined service permit. Relaunch may be needed to recover that optional service. Microphone admission does not wait for it.
 - Exact native calendar detail lookup uses the saved calendar and small date windows, but EventKit remains synchronous. Moving it to a dedicated owner is justified if physical-device traces show an interaction delay; broader queries or heuristic matches would weaken correctness.
 
 ## Validation
 
-Validated on 2026-09-17 in an isolated iPhone 17 Pro Simulator running iOS 26.5:
+Validated on 2026-09-17 in an isolated iPhone 17 Pro Simulator running iOS 26.5. The reminder feature, its suites, and its benchmark were removed later; this record is kept as measured:
 
 - All 40 registered contract suites passed in 19.2 seconds. All 12 deterministic benchmark checks passed separately in 1.2 seconds; zero semantic cases were assessed. Run them with the [canonical Simulator command](testing.md).
 - Debug and unsigned Release Simulator builds passed. The design rules and final feature-contract review passed.

@@ -29,7 +29,7 @@ def contract_manifest():
     names = [item["name"] for item in contracts]
     app = (ROOT / "Sources/App/VoiceMemoApp.swift").read_text()
     registered = re.findall(r"await\s+(\w+)\.runFromLaunchArguments\s*\(", app)
-    registered = [name for name in registered if name not in {"LocalModelProbe", "ReminderBenchmark"}]
+    registered = [name for name in registered if name != "LocalModelProbe"]
     if not contracts or len(names) != len(set(names)) or names != registered:
         raise CheckFailure("Contract manifest does not match every app launch hook, in order. Update Scripts/simulator-checks.json.")
     if len({item["marker"] for item in contracts}) != len(contracts):
@@ -44,12 +44,7 @@ def contract_manifest():
             raise CheckFailure(f"Missing source launch flag for {item['name']}.")
         if literal not in source and (not separator or logged not in source):
             raise CheckFailure(f"Success marker changed for {item['name']}; update the manifest.")
-    source = (ROOT / "Sources/App/ReminderBenchmark.swift").read_text()
-    block = source.split("private static func deterministicChecks()", 1)[1].split("\n\tprivate static func ", 1)[0]
-    checks = re.findall(r'ReminderBenchmarkCheckResult\(\s*name: "([^"\n]+)"', block)
-    if not checks or checks != manifest["benchmark_checks"] or len(checks) != len(set(checks)):
-        raise CheckFailure("Deterministic benchmark manifest does not match its source checks.")
-    return contracts, checks
+    return contracts
 
 
 def stop_process(process):
@@ -121,7 +116,7 @@ def terminate_app(device, log, required=False):
             raise CheckFailure(f"Could not confirm app cleanup. Log: {log}")
 
 
-def run_app(device, flags, markers, artifacts, name, timeout, benchmark=False):
+def run_app(device, flags, markers, artifacts, name, timeout):
     log = artifacts / f"{name}.log"
     terminate_app(device, artifacts / f"{name}-before.log")
     started = time.monotonic()
@@ -140,8 +135,6 @@ def run_app(device, flags, markers, artifacts, name, timeout, benchmark=False):
                 if all(marker in lines for marker in markers):
                     if any(lines.count(marker) != 1 for marker in markers):
                         raise CheckFailure(f"{name} emitted duplicate success markers. Log: {log}")
-                    if benchmark and len([line for line in lines if line.startswith("PASS Contract · ")]) != len(markers) - 3:
-                        raise CheckFailure(f"Unexpected deterministic benchmark check count. Log: {log}")
                     break
                 if process.poll() is not None or time.monotonic() - started >= timeout:
                     missing = [marker.split(":", 1)[0] for marker in markers if marker not in lines]
@@ -175,11 +168,11 @@ def main():
     parser.add_argument("--build-timeout", type=positive_seconds, default=600, help="Build deadline in seconds (default: 600)")
     parser.add_argument("--list", action="store_true", help="Validate and list checks without touching a Simulator")
     args = parser.parse_args()
-    contracts, checks = contract_manifest()
+    contracts = contract_manifest()
     if args.list:
         for item in contracts:
             print(f"{item['flag']}: {item['name']}")
-        print(f"{len(contracts)} contract suites; {len(checks)} deterministic benchmark checks")
+        print(f"{len(contracts)} contract suites")
         return
     if not args.device:
         parser.error("--device is required")
@@ -199,14 +192,10 @@ def main():
     command(["xcrun", "simctl", "install", args.device, str(app)], artifacts / "install.log", timeout=120)
     flags = list(dict.fromkeys(item["flag"] for item in contracts))
     contract_time = run_app(args.device, flags, [item["marker"] for item in contracts], artifacts, "contracts", args.timeout)
-    benchmark_markers = ["REMINDER_BENCHMARK_BEGIN", *[f"PASS Contract · {name}" for name in checks],
-                         "REMINDER_BENCHMARK_STATUS complete assessed=0 attempted=0 total=0", "REMINDER_BENCHMARK_END"]
-    benchmark_time = run_app(args.device, ["-reminder-benchmark", "-reminder-benchmark-deterministic-only"],
-                             benchmark_markers, artifacts, "deterministic-benchmark", args.timeout, benchmark=True)
-    summary = {"device": args.device, "app": str(app), "contracts": len(contracts), "benchmark_checks": len(checks),
-               "contract_seconds": contract_time, "benchmark_seconds": benchmark_time, "status": "passed"}
+    summary = {"device": args.device, "app": str(app), "contracts": len(contracts),
+               "contract_seconds": contract_time, "status": "passed"}
     (artifacts / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
-    print(f"PASS: {len(contracts)} contract suites and {len(checks)} deterministic benchmark checks. Artifacts: {artifacts}")
+    print(f"PASS: {len(contracts)} contract suites. Artifacts: {artifacts}")
 
 
 if __name__ == "__main__":

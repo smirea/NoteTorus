@@ -10,6 +10,9 @@
 		A1000000000000000000005F /* ProcessingBackgroundTasks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000005F /* ProcessingBackgroundTasks.swift */; };
 		A10000000000000000000001 /* VoiceMemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* VoiceMemoApp.swift */; };
 		A10000000000000000000002 /* JournalModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* JournalModels.swift */; };
+		D1F357205DF988A6A87C8C34 /* ProcrastiMateClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C142640586B500598803524D /* ProcrastiMateClient.swift */; };
+		D10524AADC104B75224D284D /* TaskEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18409F2E84CC60D97BCD1B3 /* TaskEngine.swift */; };
+		D12BF446ED6236E78D225161 /* MemoTasks.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B8102FE453E990626BBF61 /* MemoTasks.swift */; };
 		A10000000000000000000003 /* JournalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000003 /* JournalStore.swift */; };
 		A10000000000000000000004 /* ReflectionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000004 /* ReflectionEngine.swift */; };
 		A10000000000000000000005 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000005 /* AudioRecorder.swift */; };
@@ -18,6 +21,7 @@
 		A10000000000000000000008 /* JournalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000008 /* JournalView.swift */; };
 		A10000000000000000000009 /* RecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000009 /* RecordView.swift */; };
 		A1000000000000000000000A /* EntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000A /* EntryView.swift */; };
+		D1ADA28114B4ACEE758AE7E8 /* MemoTasksSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C163FE87A13221296606273C /* MemoTasksSection.swift */; };
 		A1000000000000000000000B /* ReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000B /* ReviewView.swift */; };
 		A1000000000000000000000C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000C /* SettingsView.swift */; };
 		A1000000000000000000000D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000E /* Assets.xcassets */; };
@@ -31,19 +35,11 @@
 		A10000000000000000000015 /* ICloudDriveMirror.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000015 /* ICloudDriveMirror.swift */; };
 		A10000000000000000000016 /* AudioPlayback.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000017 /* AudioPlayback.swift */; };
 		A10000000000000000000017 /* CalendarSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000018 /* CalendarSync.swift */; };
-		A10000000000000000000018 /* ReminderModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000019 /* ReminderModels.swift */; };
-		A10000000000000000000019 /* ReminderEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001A /* ReminderEngine.swift */; };
-		A1000000000000000000001A /* ReminderFeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001B /* ReminderFeedbackView.swift */; };
-		A1000000000000000000001B /* ReminderActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001C /* ReminderActivityManager.swift */; };
-		A1000000000000000000001C /* ReminderActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001D /* ReminderActivityAttributes.swift */; };
-		A1000000000000000000001D /* ReminderActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001D /* ReminderActivityAttributes.swift */; };
-		A1000000000000000000001E /* ReminderBenchmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001E /* ReminderBenchmark.swift */; };
-		A1000000000000000000001F /* ReminderBenchmarkCases.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001F /* ReminderBenchmarkCases.swift */; };
-		A10000000000000000000020 /* ReminderBenchmarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000020 /* ReminderBenchmarkView.swift */; };
 		A10000000000000000000021 /* LocationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000021 /* LocationModels.swift */; };
 		A10000000000000000000022 /* MapLocationSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000022 /* MapLocationSearch.swift */; };
 		A10000000000000000000023 /* LocationContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000023 /* LocationContractChecks.swift */; };
 		A10000000000000000000025 /* LocalModelProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000025 /* LocalModelProbe.swift */; };
+		D1D23BE5416F644879D98080 /* MemoSeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1166CEC9B9B4958FB6F5FCB /* MemoSeed.swift */; };
 		A10000000000000000000026 /* RecordingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000026 /* RecordingSession.swift */; };
 		A10000000000000000000027 /* RecordingContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000027 /* RecordingContractChecks.swift */; };
 		A10000000000000000000028 /* AudioSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000028 /* AudioSessionController.swift */; };
@@ -55,14 +51,12 @@
 		A1000000000000000000002E /* EntryProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000002E /* EntryProcessing.swift */; };
 		A1000000000000000000002F /* TranscriptionContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000002F /* TranscriptionContractChecks.swift */; };
 		A10000000000000000000030 /* ModelOutcomeContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000030 /* ModelOutcomeContractChecks.swift */; };
+		D10F7A965C0310FD33353AA5 /* MemoTaskContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E10ADAC11F750E3261DAB1 /* MemoTaskContractChecks.swift */; };
 		A10000000000000000000031 /* ProcessingWorkerContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000031 /* ProcessingWorkerContractChecks.swift */; };
 		A10000000000000000000032 /* ProcessingRepositoryContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000032 /* ProcessingRepositoryContractChecks.swift */; };
 		A10000000000000000000033 /* ServiceAdmission.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000033 /* ServiceAdmission.swift */; };
 		A10000000000000000000034 /* ServiceAdmissionContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000034 /* ServiceAdmissionContractChecks.swift */; };
 		A10000000000000000000035 /* ProcessingReliabilityContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000035 /* ProcessingReliabilityContractChecks.swift */; };
-		A10000000000000000000036 /* ReminderSchedulingContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000036 /* ReminderSchedulingContractChecks.swift */; };
-		A10000000000000000000037 /* ReminderSourceRepositoryContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000037 /* ReminderSourceRepositoryContractChecks.swift */; };
-		A10000000000000000000038 /* ReminderActivityContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000038 /* ReminderActivityContractChecks.swift */; };
 		A10000000000000000000039 /* ICloudMirrorContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000039 /* ICloudMirrorContractChecks.swift */; };
 		A1000000000000000000003A /* ICloudStoreContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000003A /* ICloudStoreContractChecks.swift */; };
 		A1000000000000000000003B /* CloudState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000003B /* CloudState.swift */; };
@@ -80,26 +74,12 @@
 		A10000000000000000000047 /* ModelContextBudget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000047 /* ModelContextBudget.swift */; };
 		A10000000000000000000048 /* ModelContextContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000048 /* ModelContextContractChecks.swift */; };
 		A10000000000000000000049 /* ReflectionContextContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000049 /* ReflectionContextContractChecks.swift */; };
-		A1000000000000000000004A /* ReminderContextContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000004A /* ReminderContextContractChecks.swift */; };
-		A1000000000000000000004B /* ReminderIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000004B /* ReminderIdentity.swift */; };
-		A1000000000000000000004C /* ReminderIdentityContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000004C /* ReminderIdentityContractChecks.swift */; };
-		A1000000000000000000004D /* ReminderValidityContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000004D /* ReminderValidityContractChecks.swift */; };
-		A1000000000000000000004E /* ReminderExactTargetContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000004E /* ReminderExactTargetContractChecks.swift */; };
-		A1000000000000000000004F /* ReminderBackfillContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000004F /* ReminderBackfillContractChecks.swift */; };
-		A10000000000000000000050 /* ReminderDeliveryContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000050 /* ReminderDeliveryContractChecks.swift */; };
-		A10000000000000000000051 /* ReminderPresentationContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000051 /* ReminderPresentationContractChecks.swift */; };
 		A10000000000000000000053 /* RecordingPresentationContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000053 /* RecordingPresentationContractChecks.swift */; };
 		A10000000000000000000052 /* RecordingActivityContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000052 /* RecordingActivityContractChecks.swift */; };
 		A10000000000000000000054 /* CalendarOccurrenceIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000054 /* CalendarOccurrenceIdentity.swift */; };
 		A10000000000000000000055 /* CalendarOccurrenceContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000055 /* CalendarOccurrenceContractChecks.swift */; };
-		A10000000000000000000056 /* ReminderOccurrenceContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000056 /* ReminderOccurrenceContractChecks.swift */; };
 		A10000000000000000000057 /* CalendarEventNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000057 /* CalendarEventNavigation.swift */; };
 		A10000000000000000000058 /* CalendarNavigationContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000058 /* CalendarNavigationContractChecks.swift */; };
-		A10000000000000000000059 /* ReminderMatchCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000059 /* ReminderMatchCache.swift */; };
-		A1000000000000000000005A /* ReminderMatchingContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000005A /* ReminderMatchingContractChecks.swift */; };
-		A1000000000000000000005B /* ReminderFeedbackSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000005B /* ReminderFeedbackSession.swift */; };
-		A1000000000000000000005C /* ReminderFeedbackContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000005C /* ReminderFeedbackContractChecks.swift */; };
-		A1000000000000000000005D /* ReminderBenchmarkContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000005D /* ReminderBenchmarkContractChecks.swift */; };
 		A1000000000000000000005E /* WeeklyRecordingMetricContractChecks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000005E /* WeeklyRecordingMetricContractChecks.swift */; };
 /* End PBXBuildFile section */
 
@@ -131,6 +111,9 @@
 		B1000000000000000000005F /* ProcessingBackgroundTasks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingBackgroundTasks.swift; sourceTree = "<group>"; };
 		B10000000000000000000001 /* VoiceMemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceMemoApp.swift; sourceTree = "<group>"; };
 		B10000000000000000000002 /* JournalModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalModels.swift; sourceTree = "<group>"; };
+		C142640586B500598803524D /* ProcrastiMateClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcrastiMateClient.swift; sourceTree = "<group>"; };
+		C18409F2E84CC60D97BCD1B3 /* TaskEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskEngine.swift; sourceTree = "<group>"; };
+		C1B8102FE453E990626BBF61 /* MemoTasks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoTasks.swift; sourceTree = "<group>"; };
 		B10000000000000000000003 /* JournalStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalStore.swift; sourceTree = "<group>"; };
 		B10000000000000000000004 /* ReflectionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReflectionEngine.swift; sourceTree = "<group>"; };
 		B10000000000000000000005 /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
@@ -139,6 +122,7 @@
 		B10000000000000000000008 /* JournalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalView.swift; sourceTree = "<group>"; };
 		B10000000000000000000009 /* RecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordView.swift; sourceTree = "<group>"; };
 		B1000000000000000000000A /* EntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryView.swift; sourceTree = "<group>"; };
+		C163FE87A13221296606273C /* MemoTasksSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoTasksSection.swift; sourceTree = "<group>"; };
 		B1000000000000000000000B /* ReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewView.swift; sourceTree = "<group>"; };
 		B1000000000000000000000C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B1000000000000000000000D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -153,18 +137,11 @@
 		B10000000000000000000016 /* MyVoiceMemo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MyVoiceMemo.entitlements; sourceTree = "<group>"; };
 		B10000000000000000000017 /* AudioPlayback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayback.swift; sourceTree = "<group>"; };
 		B10000000000000000000018 /* CalendarSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSync.swift; sourceTree = "<group>"; };
-		B10000000000000000000019 /* ReminderModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderModels.swift; sourceTree = "<group>"; };
-		B1000000000000000000001A /* ReminderEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderEngine.swift; sourceTree = "<group>"; };
-		B1000000000000000000001B /* ReminderFeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderFeedbackView.swift; sourceTree = "<group>"; };
-		B1000000000000000000001C /* ReminderActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderActivityManager.swift; sourceTree = "<group>"; };
-		B1000000000000000000001D /* ReminderActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderActivityAttributes.swift; sourceTree = "<group>"; };
-		B1000000000000000000001E /* ReminderBenchmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderBenchmark.swift; sourceTree = "<group>"; };
-		B1000000000000000000001F /* ReminderBenchmarkCases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderBenchmarkCases.swift; sourceTree = "<group>"; };
-		B10000000000000000000020 /* ReminderBenchmarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderBenchmarkView.swift; sourceTree = "<group>"; };
 		B10000000000000000000021 /* LocationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationModels.swift; sourceTree = "<group>"; };
 		B10000000000000000000022 /* MapLocationSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapLocationSearch.swift; sourceTree = "<group>"; };
 		B10000000000000000000023 /* LocationContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationContractChecks.swift; sourceTree = "<group>"; };
 		B10000000000000000000025 /* LocalModelProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalModelProbe.swift; sourceTree = "<group>"; };
+		C1166CEC9B9B4958FB6F5FCB /* MemoSeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoSeed.swift; sourceTree = "<group>"; };
 		C10000000000000000000001 /* MyVoiceMemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyVoiceMemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C10000000000000000000002 /* VoiceMemoWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = VoiceMemoWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		B10000000000000000000026 /* RecordingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingSession.swift; sourceTree = "<group>"; };
@@ -178,14 +155,12 @@
 		B1000000000000000000002E /* EntryProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryProcessing.swift; sourceTree = "<group>"; };
 		B1000000000000000000002F /* TranscriptionContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionContractChecks.swift; sourceTree = "<group>"; };
 		B10000000000000000000030 /* ModelOutcomeContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelOutcomeContractChecks.swift; sourceTree = "<group>"; };
+		C1E10ADAC11F750E3261DAB1 /* MemoTaskContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoTaskContractChecks.swift; sourceTree = "<group>"; };
 		B10000000000000000000031 /* ProcessingWorkerContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingWorkerContractChecks.swift; sourceTree = "<group>"; };
 		B10000000000000000000032 /* ProcessingRepositoryContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingRepositoryContractChecks.swift; sourceTree = "<group>"; };
 		B10000000000000000000033 /* ServiceAdmission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceAdmission.swift; sourceTree = "<group>"; };
 		B10000000000000000000034 /* ServiceAdmissionContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceAdmissionContractChecks.swift; sourceTree = "<group>"; };
 		B10000000000000000000035 /* ProcessingReliabilityContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingReliabilityContractChecks.swift; sourceTree = "<group>"; };
-		B10000000000000000000036 /* ReminderSchedulingContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderSchedulingContractChecks.swift; sourceTree = "<group>"; };
-		B10000000000000000000037 /* ReminderSourceRepositoryContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderSourceRepositoryContractChecks.swift; sourceTree = "<group>"; };
-		B10000000000000000000038 /* ReminderActivityContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderActivityContractChecks.swift; sourceTree = "<group>"; };
 		B10000000000000000000039 /* ICloudMirrorContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudMirrorContractChecks.swift; sourceTree = "<group>"; };
 		B1000000000000000000003A /* ICloudStoreContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudStoreContractChecks.swift; sourceTree = "<group>"; };
 		B1000000000000000000003B /* CloudState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudState.swift; sourceTree = "<group>"; };
@@ -203,26 +178,12 @@
 		B10000000000000000000047 /* ModelContextBudget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelContextBudget.swift; sourceTree = "<group>"; };
 		B10000000000000000000048 /* ModelContextContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelContextContractChecks.swift; sourceTree = "<group>"; };
 		B10000000000000000000049 /* ReflectionContextContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReflectionContextContractChecks.swift; sourceTree = "<group>"; };
-		B1000000000000000000004A /* ReminderContextContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderContextContractChecks.swift; sourceTree = "<group>"; };
-		B1000000000000000000004B /* ReminderIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderIdentity.swift; sourceTree = "<group>"; };
-		B1000000000000000000004C /* ReminderIdentityContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderIdentityContractChecks.swift; sourceTree = "<group>"; };
-		B1000000000000000000004D /* ReminderValidityContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderValidityContractChecks.swift; sourceTree = "<group>"; };
-		B1000000000000000000004E /* ReminderExactTargetContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderExactTargetContractChecks.swift; sourceTree = "<group>"; };
-		B1000000000000000000004F /* ReminderBackfillContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderBackfillContractChecks.swift; sourceTree = "<group>"; };
-		B10000000000000000000050 /* ReminderDeliveryContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderDeliveryContractChecks.swift; sourceTree = "<group>"; };
-		B10000000000000000000051 /* ReminderPresentationContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderPresentationContractChecks.swift; sourceTree = "<group>"; };
 		B10000000000000000000053 /* RecordingPresentationContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingPresentationContractChecks.swift; sourceTree = "<group>"; };
 		B10000000000000000000052 /* RecordingActivityContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingActivityContractChecks.swift; sourceTree = "<group>"; };
 		B10000000000000000000054 /* CalendarOccurrenceIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarOccurrenceIdentity.swift; sourceTree = "<group>"; };
 		B10000000000000000000055 /* CalendarOccurrenceContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarOccurrenceContractChecks.swift; sourceTree = "<group>"; };
-		B10000000000000000000056 /* ReminderOccurrenceContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderOccurrenceContractChecks.swift; sourceTree = "<group>"; };
 		B10000000000000000000057 /* CalendarEventNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEventNavigation.swift; sourceTree = "<group>"; };
 		B10000000000000000000058 /* CalendarNavigationContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarNavigationContractChecks.swift; sourceTree = "<group>"; };
-		B10000000000000000000059 /* ReminderMatchCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderMatchCache.swift; sourceTree = "<group>"; };
-		B1000000000000000000005A /* ReminderMatchingContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderMatchingContractChecks.swift; sourceTree = "<group>"; };
-		B1000000000000000000005B /* ReminderFeedbackSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderFeedbackSession.swift; sourceTree = "<group>"; };
-		B1000000000000000000005C /* ReminderFeedbackContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderFeedbackContractChecks.swift; sourceTree = "<group>"; };
-		B1000000000000000000005D /* ReminderBenchmarkContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderBenchmarkContractChecks.swift; sourceTree = "<group>"; };
 		B1000000000000000000005E /* WeeklyRecordingMetricContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyRecordingMetricContractChecks.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -260,17 +221,18 @@
 			children = (
 				B10000000000000000000001 /* VoiceMemoApp.swift */,
 				B10000000000000000000002 /* JournalModels.swift */,
+				C142640586B500598803524D /* ProcrastiMateClient.swift */,
+				C18409F2E84CC60D97BCD1B3 /* TaskEngine.swift */,
+				C1B8102FE453E990626BBF61 /* MemoTasks.swift */,
 				B10000000000000000000021 /* LocationModels.swift */,
 				B10000000000000000000023 /* LocationContractChecks.swift */,
 				B10000000000000000000025 /* LocalModelProbe.swift */,
+				C1166CEC9B9B4958FB6F5FCB /* MemoSeed.swift */,
 				B10000000000000000000029 /* PlaybackContractChecks.swift */,
 				B1000000000000000000002B /* StorageContractChecks.swift */,
 				B1000000000000000000002D /* AudioFinalizationContractChecks.swift */,
 				B10000000000000000000033 /* ServiceAdmission.swift */,
 				B10000000000000000000034 /* ServiceAdmissionContractChecks.swift */,
-				B10000000000000000000036 /* ReminderSchedulingContractChecks.swift */,
-				B10000000000000000000037 /* ReminderSourceRepositoryContractChecks.swift */,
-				B10000000000000000000038 /* ReminderActivityContractChecks.swift */,
 				B1000000000000000000003A /* ICloudStoreContractChecks.swift */,
 				B10000000000000000000043 /* CloudStoreReliabilityContractChecks.swift */,
 				B10000000000000000000044 /* WaveformCache.swift */,
@@ -289,6 +251,7 @@
 				B10000000000000000000032 /* ProcessingRepositoryContractChecks.swift */,
 				B10000000000000000000031 /* ProcessingWorkerContractChecks.swift */,
 				B10000000000000000000030 /* ModelOutcomeContractChecks.swift */,
+				C1E10ADAC11F750E3261DAB1 /* MemoTaskContractChecks.swift */,
 				B1000000000000000000002F /* TranscriptionContractChecks.swift */,
 				B1000000000000000000002E /* EntryProcessing.swift */,
 				B1000000000000000000002C /* AudioFinalizer.swift */,
@@ -299,34 +262,15 @@
 				B1000000000000000000005F /* ProcessingBackgroundTasks.swift */,
 				B10000000000000000000003 /* JournalStore.swift */,
 				B10000000000000000000018 /* CalendarSync.swift */,
-				B10000000000000000000019 /* ReminderModels.swift */,
-				B1000000000000000000001A /* ReminderEngine.swift */,
-				B1000000000000000000001E /* ReminderBenchmark.swift */,
-				B1000000000000000000001F /* ReminderBenchmarkCases.swift */,
-				B10000000000000000000020 /* ReminderBenchmarkView.swift */,
 				B10000000000000000000015 /* ICloudDriveMirror.swift */,
 				B10000000000000000000004 /* ReflectionEngine.swift */,
-				B1000000000000000000004B /* ReminderIdentity.swift */,
-				B1000000000000000000004C /* ReminderIdentityContractChecks.swift */,
-				B1000000000000000000004D /* ReminderValidityContractChecks.swift */,
-				B1000000000000000000004E /* ReminderExactTargetContractChecks.swift */,
-				B1000000000000000000004F /* ReminderBackfillContractChecks.swift */,
-				B10000000000000000000050 /* ReminderDeliveryContractChecks.swift */,
-				B10000000000000000000051 /* ReminderPresentationContractChecks.swift */,
 				B10000000000000000000054 /* CalendarOccurrenceIdentity.swift */,
 				B10000000000000000000055 /* CalendarOccurrenceContractChecks.swift */,
-				B10000000000000000000056 /* ReminderOccurrenceContractChecks.swift */,
 				B10000000000000000000057 /* CalendarEventNavigation.swift */,
-				B10000000000000000000059 /* ReminderMatchCache.swift */,
-				B1000000000000000000005A /* ReminderMatchingContractChecks.swift */,
-				B1000000000000000000005B /* ReminderFeedbackSession.swift */,
-				B1000000000000000000005C /* ReminderFeedbackContractChecks.swift */,
-				B1000000000000000000005D /* ReminderBenchmarkContractChecks.swift */,
 				B1000000000000000000005E /* WeeklyRecordingMetricContractChecks.swift */,
 				B10000000000000000000058 /* CalendarNavigationContractChecks.swift */,
 				B10000000000000000000053 /* RecordingPresentationContractChecks.swift */,
 				B10000000000000000000052 /* RecordingActivityContractChecks.swift */,
-				B1000000000000000000004A /* ReminderContextContractChecks.swift */,
 				B10000000000000000000049 /* ReflectionContextContractChecks.swift */,
 				B10000000000000000000048 /* ModelContextContractChecks.swift */,
 				B10000000000000000000047 /* ModelContextBudget.swift */,
@@ -337,11 +281,10 @@
 				B10000000000000000000008 /* JournalView.swift */,
 				B10000000000000000000009 /* RecordView.swift */,
 				B1000000000000000000000A /* EntryView.swift */,
-				B1000000000000000000001B /* ReminderFeedbackView.swift */,
+				C163FE87A13221296606273C /* MemoTasksSection.swift */,
 				B1000000000000000000000B /* ReviewView.swift */,
 				B1000000000000000000000C /* SettingsView.swift */,
 				B1000000000000000000000F /* RecordingActivityManager.swift */,
-				B1000000000000000000001C /* ReminderActivityManager.swift */,
 				B10000000000000000000014 /* EntryLocationCapture.swift */,
 				B10000000000000000000022 /* MapLocationSearch.swift */,
 			);
@@ -373,7 +316,6 @@
 			isa = PBXGroup;
 			children = (
 				B10000000000000000000010 /* RecordingActivityAttributes.swift */,
-				B1000000000000000000001D /* ReminderActivityAttributes.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -535,17 +477,18 @@
 			files = (
 				A10000000000000000000001 /* VoiceMemoApp.swift in Sources */,
 				A10000000000000000000002 /* JournalModels.swift in Sources */,
+				D1F357205DF988A6A87C8C34 /* ProcrastiMateClient.swift in Sources */,
+				D10524AADC104B75224D284D /* TaskEngine.swift in Sources */,
+				D12BF446ED6236E78D225161 /* MemoTasks.swift in Sources */,
 				A10000000000000000000021 /* LocationModels.swift in Sources */,
 				A10000000000000000000023 /* LocationContractChecks.swift in Sources */,
 				A10000000000000000000025 /* LocalModelProbe.swift in Sources */,
+				D1D23BE5416F644879D98080 /* MemoSeed.swift in Sources */,
 				A10000000000000000000029 /* PlaybackContractChecks.swift in Sources */,
 				A1000000000000000000002B /* StorageContractChecks.swift in Sources */,
 				A1000000000000000000002D /* AudioFinalizationContractChecks.swift in Sources */,
 				A10000000000000000000033 /* ServiceAdmission.swift in Sources */,
 				A10000000000000000000034 /* ServiceAdmissionContractChecks.swift in Sources */,
-				A10000000000000000000036 /* ReminderSchedulingContractChecks.swift in Sources */,
-				A10000000000000000000037 /* ReminderSourceRepositoryContractChecks.swift in Sources */,
-				A10000000000000000000038 /* ReminderActivityContractChecks.swift in Sources */,
 				A1000000000000000000003A /* ICloudStoreContractChecks.swift in Sources */,
 				A10000000000000000000043 /* CloudStoreReliabilityContractChecks.swift in Sources */,
 				A10000000000000000000044 /* WaveformCache.swift in Sources */,
@@ -564,6 +507,7 @@
 				A10000000000000000000032 /* ProcessingRepositoryContractChecks.swift in Sources */,
 				A10000000000000000000031 /* ProcessingWorkerContractChecks.swift in Sources */,
 				A10000000000000000000030 /* ModelOutcomeContractChecks.swift in Sources */,
+				D10F7A965C0310FD33353AA5 /* MemoTaskContractChecks.swift in Sources */,
 				A1000000000000000000002F /* TranscriptionContractChecks.swift in Sources */,
 				A1000000000000000000002E /* EntryProcessing.swift in Sources */,
 				A1000000000000000000002C /* AudioFinalizer.swift in Sources */,
@@ -574,35 +518,16 @@
 				A1000000000000000000005F /* ProcessingBackgroundTasks.swift in Sources */,
 				A10000000000000000000003 /* JournalStore.swift in Sources */,
 				A10000000000000000000017 /* CalendarSync.swift in Sources */,
-				A10000000000000000000018 /* ReminderModels.swift in Sources */,
-				A10000000000000000000019 /* ReminderEngine.swift in Sources */,
-				A1000000000000000000001E /* ReminderBenchmark.swift in Sources */,
-				A1000000000000000000001F /* ReminderBenchmarkCases.swift in Sources */,
-				A10000000000000000000020 /* ReminderBenchmarkView.swift in Sources */,
 				A10000000000000000000015 /* ICloudDriveMirror.swift in Sources */,
 				A10000000000000000000016 /* AudioPlayback.swift in Sources */,
 				A10000000000000000000004 /* ReflectionEngine.swift in Sources */,
-				A1000000000000000000004B /* ReminderIdentity.swift in Sources */,
-				A1000000000000000000004C /* ReminderIdentityContractChecks.swift in Sources */,
-				A1000000000000000000004D /* ReminderValidityContractChecks.swift in Sources */,
-				A1000000000000000000004E /* ReminderExactTargetContractChecks.swift in Sources */,
-				A1000000000000000000004F /* ReminderBackfillContractChecks.swift in Sources */,
-				A10000000000000000000050 /* ReminderDeliveryContractChecks.swift in Sources */,
-				A10000000000000000000051 /* ReminderPresentationContractChecks.swift in Sources */,
 				A10000000000000000000054 /* CalendarOccurrenceIdentity.swift in Sources */,
 				A10000000000000000000055 /* CalendarOccurrenceContractChecks.swift in Sources */,
-				A10000000000000000000056 /* ReminderOccurrenceContractChecks.swift in Sources */,
 				A10000000000000000000057 /* CalendarEventNavigation.swift in Sources */,
-				A10000000000000000000059 /* ReminderMatchCache.swift in Sources */,
-				A1000000000000000000005A /* ReminderMatchingContractChecks.swift in Sources */,
-				A1000000000000000000005B /* ReminderFeedbackSession.swift in Sources */,
-				A1000000000000000000005C /* ReminderFeedbackContractChecks.swift in Sources */,
-				A1000000000000000000005D /* ReminderBenchmarkContractChecks.swift in Sources */,
 				A1000000000000000000005E /* WeeklyRecordingMetricContractChecks.swift in Sources */,
 				A10000000000000000000058 /* CalendarNavigationContractChecks.swift in Sources */,
 				A10000000000000000000053 /* RecordingPresentationContractChecks.swift in Sources */,
 				A10000000000000000000052 /* RecordingActivityContractChecks.swift in Sources */,
-				A1000000000000000000004A /* ReminderContextContractChecks.swift in Sources */,
 				A10000000000000000000049 /* ReflectionContextContractChecks.swift in Sources */,
 				A10000000000000000000048 /* ModelContextContractChecks.swift in Sources */,
 				A10000000000000000000047 /* ModelContextBudget.swift in Sources */,
@@ -612,15 +537,13 @@
 				A10000000000000000000008 /* JournalView.swift in Sources */,
 				A10000000000000000000009 /* RecordView.swift in Sources */,
 				A1000000000000000000000A /* EntryView.swift in Sources */,
-				A1000000000000000000001A /* ReminderFeedbackView.swift in Sources */,
+				D1ADA28114B4ACEE758AE7E8 /* MemoTasksSection.swift in Sources */,
 				A1000000000000000000000B /* ReviewView.swift in Sources */,
 				A1000000000000000000000C /* SettingsView.swift in Sources */,
 				A1000000000000000000000E /* RecordingActivityManager.swift in Sources */,
-				A1000000000000000000001B /* ReminderActivityManager.swift in Sources */,
 				A10000000000000000000014 /* EntryLocationCapture.swift in Sources */,
 				A10000000000000000000022 /* MapLocationSearch.swift in Sources */,
 				A1000000000000000000000F /* RecordingActivityAttributes.swift in Sources */,
-				A1000000000000000000001C /* ReminderActivityAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -630,7 +553,6 @@
 			files = (
 				A10000000000000000000010 /* VoiceMemoWidgets.swift in Sources */,
 				A10000000000000000000011 /* RecordingActivityAttributes.swift in Sources */,
-				A1000000000000000000001D /* ReminderActivityAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

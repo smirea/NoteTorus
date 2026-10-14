@@ -1,14 +1,23 @@
 import Foundation
 
 enum ProcessingStage: String, Codable, Hashable, Sendable {
-	case finalizeAudio, transcribe, reflect, reminders
+	case finalizeAudio, transcribe, reflect, tasks
 	var phase: EntryProcessingPhase {
 		switch self {
 		case .finalizeAudio: .finalizing
 		case .transcribe: .transcribing
 		case .reflect: .reflecting
-		case .reminders: .reminders
+		case .tasks: .tasks
 		}
+	}
+
+	init(from decoder: Decoder) throws {
+		let raw = try decoder.singleValueContainer().decode(String.self)
+		// Tasks replaced the reminders stage, so a note that finished reminders is not sent to ProcrastiMate.
+		guard let stage = Self(rawValue: raw == "reminders" ? "tasks" : raw) else {
+			throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "Unknown stage \(raw)"))
+		}
+		self = stage
 	}
 }
 
@@ -85,12 +94,12 @@ struct ProcessingLease: Hashable, Sendable {
 enum ProcessingDeadline {
 	static func seconds(stage: ProcessingStage, entry: JournalEntry) -> TimeInterval {
 		let duration = entry.duration.isFinite ? max(0, entry.duration) : 0
-		let context = Double(entry.transcript.utf8.count + entry.reminderFeedback.reduce(0) { $0 + $1.text.utf8.count })
+		let context = Double(entry.transcript.utf8.count)
 		switch stage {
 		case .finalizeAudio: return max(120, duration * 2 + 60)
 		case .transcribe: return max(180, duration * 3 + 120)
 		case .reflect: return max(180, context / 20 + 120)
-		case .reminders: return max(300, context / 10 + 180)
+		case .tasks: return max(180, context / 20 + 120)
 		}
 	}
 }
@@ -113,7 +122,7 @@ actor ProcessingTemporaryFiles {
 			var issues: [String] = []
 			for file in files {
 				let stem = file.deletingPathExtension().lastPathComponent
-				let patterns = [("speech-input-", "caf"), ("elevenlabs-", "multipart"), ("reminder-feedback-", "m4a")]
+				let patterns = [("speech-input-", "caf"), ("elevenlabs-", "multipart")]
 				guard patterns.contains(where: { prefix, ext in
 					guard file.pathExtension == ext, stem.hasPrefix(prefix) else { return false }
 					let id = String(stem.dropFirst(prefix.count))
@@ -137,26 +146,10 @@ struct ProcessingWork: Sendable {
 
 enum JournalEdit: Sendable {
 	case location(JournalLocation)
-	case feedback(ReminderFeedback)
-	case removeReminder(UUID, ReminderFeedback)
-
-	var changesReminderSource: Bool {
-		if case .location = self { return false }
-		return true
-	}
 
 	func apply(to entry: inout JournalEntry) {
 		switch self {
 		case let .location(value): entry.location = value
-		case let .feedback(value):
-			if !entry.reminderFeedback.contains(where: { $0.id == value.id }) { entry.reminderFeedback.append(value) }
-		case let .removeReminder(id, feedback):
-			if let removed = entry.reminders.first(where: { $0.id == id }) {
-				entry.reminderHistory.removeAll { $0.id == id }
-				entry.reminderHistory.append(removed)
-			}
-			entry.reminders.removeAll { $0.id == id }
-			if !entry.reminderFeedback.contains(where: { $0.id == feedback.id }) { entry.reminderFeedback.append(feedback) }
 		}
 	}
 }
@@ -164,15 +157,21 @@ enum JournalEdit: Sendable {
 struct ProcessingServices: Sendable {
 	var transcribe: @Sendable (URL, Bool, String?, @escaping @Sendable (TranscriptionProgress) -> Void) async throws -> TranscriptionResult
 	var reflect: @Sendable (String, Bool) async -> ReflectionResult
-	var reminders: @Sendable (JournalEntry) async -> ReminderParsingResult
+	var tasks: @Sendable (JournalEntry, [JournalCalendarEvent]) async -> TaskExtractionResult
 
 	static let live = ProcessingServices(
 		transcribe: { url, preferred, key, update in
 			try await AudioTranscriber.transcribe(url: url, preferElevenLabs: preferred, elevenLabsAPIKey: key, onUpdate: update)
 		},
 		reflect: { await ReflectionEngine.reflect(on: $0, includeSummary: $1) },
-		reminders: { entry in
-			await ReminderEngine.parse(transcript: entry.transcript, sourceEvent: entry.calendarEvent,
-				createdAt: entry.createdAt, currentReminders: entry.reminders, feedback: entry.reminderFeedback)
+		tasks: { entry, calendar in
+			#if DEBUG
+			if let fixture = MemoSeed.fixtureTaskServices(transcript: entry.transcript) {
+				return await TaskEngine.extract(transcript: entry.transcript, event: entry.calendarEvent,
+					recordedAt: entry.createdAt, calendar: calendar, modelIsAvailable: { true }, services: fixture)
+			}
+			#endif
+			return await TaskEngine.extract(transcript: entry.transcript, event: entry.calendarEvent,
+				recordedAt: entry.createdAt, calendar: calendar)
 		})
 }

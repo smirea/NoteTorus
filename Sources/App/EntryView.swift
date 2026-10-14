@@ -12,9 +12,9 @@ struct EntryView: View {
 	@State private var presentedCalendarEvent: PresentedCalendarEvent?
 	@State private var isMissingCalendarEventAlertPresented = false
 	@State private var calendarOpenID = UUID()
-	@State private var showsReminderFeedback = false
 	@State private var showsNoteActions = false
 	@State private var sharedEntry: JournalEntryExport?
+	@State private var entryPendingDeletion: JournalEntry?
 	@Namespace private var noteActionsNamespace
 	private struct AudioLoadKey: Hashable {
 		var url: URL
@@ -126,48 +126,37 @@ struct EntryView: View {
 						.entryListRow()
 				}
 
-				if currentEntry.calendarEvent != nil {
-					if currentEntry.reminders.isEmpty {
-						reminderFeedbackButton(empty: true)
-							.entryListRow()
-					} else {
-						ForEach(currentEntry.reminders) { reminder in
-							ReminderRuleRow(reminder: reminder)
-								.listRowInsets(EdgeInsets(
-									top: 0,
-									leading: 24,
-									bottom: 0,
-									trailing: 24
-								))
-								.listRowBackground(AppStyle.background)
-								.listRowSeparator(
-									reminder.id == currentEntry.reminders.last?.id
-										? .hidden
-										: .visible
-								)
-								.listRowSeparatorTint(Color.white.opacity(0.14))
-								.swipeActions(edge: .trailing, allowsFullSwipe: true) {
-									Button(role: .destructive) {
-										withAnimation(.easeOut(duration: 0.2)) {
-											store.removeReminder(
-												entryID: entry.id,
-												reminderID: reminder.id
-											)
-										}
-									} label: {
-										Label("Remove", systemImage: "trash")
-									}
-								}
-						}
-
-						VStack(alignment: .leading, spacing: 14) {
-							reminderFeedbackButton(empty: false)
-							if store.settings.showModelNames,
-								let model = currentEntry.reminderModel {
-								ModelAttribution(model: model)
+				let taskRows = MemoTasksPresentation.rows(tasks: currentEntry.tasks, delivery: store.taskDeliveries[entry.id],
+					remote: store.remoteTasks[entry.id])
+				if !taskRows.isEmpty {
+					Text("Tasks")
+						.font(.footnote.weight(.semibold))
+						.foregroundStyle(AppStyle.secondary)
+						.accessibilityAddTraits(.isHeader)
+						.entryListRow(bottom: 2)
+					ForEach(taskRows) { row in
+						MemoTaskRowView(row: row)
+							.listRowInsets(EdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24))
+							.listRowBackground(AppStyle.background)
+							.listRowSeparator(row.id == taskRows.last?.id ? .hidden : .visible)
+							.listRowSeparatorTint(Color.white.opacity(0.14))
+					}
+					let note = MemoTasksPresentation.note(delivery: store.taskDeliveries[entry.id])
+					let model = store.settings.showModelNames ? currentEntry.taskModel : nil
+					if note != nil || model != nil {
+						VStack(alignment: .leading, spacing: 10) {
+							if let note {
+								Text(note)
+									.font(.footnote)
+									.foregroundStyle(AppStyle.secondary)
+									.fixedSize(horizontal: false, vertical: true)
 							}
+							if let model { ModelAttribution(model: model) }
 						}
+						.padding(.top, 6)
 						.entryListRow()
+					} else {
+						Color.clear.frame(height: 22).entryListRow(bottom: 0)
 					}
 				}
 
@@ -235,21 +224,20 @@ struct EntryView: View {
 		.background(NativeBackSwipeEnabler())
 		.animation(.easeOut(duration: 0.22), value: store.processingPhase(for: entry.id))
 		.animation(.easeOut(duration: 0.28), value: currentEntry.location)
-		.task {
-			if ProcessInfo.processInfo.arguments.contains("-demo-reminder-feedback") {
-				playback.pause()
-				showsReminderFeedback = true
-			}
+		.task(id: entry.id) {
+			#if DEBUG
+			if ProcessInfo.processInfo.arguments.contains("-demo-delete-prompt") { entryPendingDeletion = currentEntry }
+			#endif
+			if case .blocked = store.taskDeliveries[entry.id] { store.scheduleTaskDelivery(repair: true) }
+			await store.refreshRemoteTasks(for: entry.id)
 		}
 		.onDisappear {
 			calendarOpenID = UUID()
 			playback.stop()
 		}
+		.modifier(MemoDeletionConfirmation(store: store, entry: $entryPendingDeletion) { dismiss() })
 		.sheet(item: $presentedCalendarEvent) { presentedEvent in
 			CalendarEventDetail(event: presentedEvent.event)
-		}
-		.sheet(isPresented: $showsReminderFeedback) {
-			ReminderFeedbackView(store: store, entryID: entry.id)
 		}
 		.sheet(item: $sharedEntry) { entry in
 			JournalEntryShareSheet(export: entry)
@@ -337,6 +325,21 @@ struct EntryView: View {
 			.buttonStyle(.plain)
 			.padding(.horizontal, 16)
 			.frame(height: 52)
+
+			Divider()
+
+			Button(role: .destructive) {
+				setNoteActionsPresented(false)
+				entryPendingDeletion = currentEntry
+			} label: {
+				Label("Delete", systemImage: "trash")
+					.frame(maxWidth: .infinity, alignment: .leading)
+					.contentShape(Rectangle())
+			}
+			.buttonStyle(.plain)
+			.foregroundStyle(.red)
+			.padding(.horizontal, 16)
+			.frame(height: 52)
 		}
 		.frame(width: 260)
 	}
@@ -352,26 +355,6 @@ struct EntryView: View {
 			get: { store.settings.showModelNames },
 			set: { store.setShowModelNames($0) }
 		)
-	}
-
-	private func reminderFeedbackButton(empty: Bool) -> some View {
-		Button {
-			playback.pause()
-			showsReminderFeedback = true
-		} label: {
-			Label(
-				empty ? "No reminders: Add feedback" : "Add feedback",
-				systemImage: "waveform"
-			)
-				.font(.system(size: 15, weight: .semibold))
-				.foregroundStyle(AppStyle.accent)
-		}
-		.buttonStyle(.plain)
-		.disabled(
-			!store.settings.eventRemindersEnabled
-				|| store.processingPhase(for: entry.id)?.isActive == true
-		)
-		.accessibilityHint("Records a temporary correction and reprocesses these reminders")
 	}
 
 	private func openCalendarEvent(_ event: JournalCalendarEvent) {
@@ -454,111 +437,6 @@ private extension View {
 		listRowInsets(EdgeInsets(top: 0, leading: 24, bottom: bottom, trailing: 24))
 			.listRowBackground(AppStyle.background)
 			.listRowSeparator(.hidden)
-	}
-}
-
-private struct ReminderRuleRow: View {
-	let reminder: EventReminderRule
-	@State private var isExpanded = false
-
-	private var scheduleText: String {
-		var text = "\(reminder.occurrencePolicy.title) “\(reminder.selector.title)”"
-		if let expiresAt = reminder.expiresAt {
-			text += " until \(expiresAt.formatted(date: .abbreviated, time: .omitted))"
-		}
-		return text
-	}
-
-	private var hasDetails: Bool {
-		!reminder.evidence.isEmpty
-			|| !reminder.motivation.isEmpty
-			|| !reminder.selector.examples.isEmpty
-	}
-
-	var body: some View {
-		Group {
-			if hasDetails {
-				DisclosureGroup(isExpanded: $isExpanded) {
-					reminderDetails
-				} label: {
-					reminderLabel
-				}
-			} else {
-				reminderLabel
-			}
-		}
-		.tint(AppStyle.secondary)
-		.frame(maxWidth: .infinity, alignment: .leading)
-		.contentShape(Rectangle())
-		.accessibilityValue(hasDetails ? (isExpanded ? "Expanded" : "Collapsed") : "")
-		.accessibilityHint(hasDetails ? "Shows or hides why this reminder appears" : "")
-		.padding(.vertical, 10)
-	}
-
-	private var reminderLabel: some View {
-		HStack(alignment: .top, spacing: 11) {
-			Image(systemName: "circle")
-				.font(.system(size: 17, weight: .medium))
-				.foregroundStyle(AppStyle.accent)
-				.padding(.top, 2)
-
-			VStack(alignment: .leading, spacing: 4) {
-				Text(reminder.text)
-					.font(.system(size: 16, weight: .semibold))
-					.foregroundStyle(.white)
-					.fixedSize(horizontal: false, vertical: true)
-				Text(scheduleText)
-					.font(.system(size: 12, weight: .medium))
-					.foregroundStyle(AppStyle.secondary)
-					.fixedSize(horizontal: false, vertical: true)
-			}
-
-			Spacer(minLength: 4)
-		}
-	}
-
-	@ViewBuilder
-	private var reminderDetails: some View {
-		VStack(alignment: .leading, spacing: 10) {
-			if !reminder.motivation.isEmpty {
-				ReminderDetail(label: "Why", text: reminder.motivation)
-			}
-			if !reminder.evidence.isEmpty {
-				ReminderDetail(label: "From your recordings", text: "“\(reminder.evidence)”")
-			}
-			ForEach(reminder.selector.examples) { example in
-				HStack(alignment: .top, spacing: 11) {
-					Image(systemName: example.matches ? "checkmark.circle.fill" : "xmark.circle")
-						.foregroundStyle(example.matches ? AppStyle.accent : AppStyle.tertiary)
-					VStack(alignment: .leading, spacing: 4) {
-						Text(example.event.title)
-							.font(.system(size: 13, weight: .semibold))
-							.foregroundStyle(.white)
-						Text(example.reason)
-							.font(.caption)
-							.foregroundStyle(AppStyle.secondary)
-					}
-				}
-			}
-		}
-	}
-}
-
-private struct ReminderDetail: View {
-	let label: String
-	let text: String
-
-	var body: some View {
-		VStack(alignment: .leading, spacing: 2) {
-			Text(label.uppercased())
-				.font(.system(size: 10, weight: .bold))
-				.foregroundStyle(AppStyle.tertiary)
-				.tracking(0.5)
-			Text(text)
-				.font(.system(size: 13))
-				.foregroundStyle(AppStyle.secondary)
-				.fixedSize(horizontal: false, vertical: true)
-		}
 	}
 }
 

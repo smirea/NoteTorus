@@ -7,7 +7,6 @@ enum CalendarOccurrenceContractChecks {
 		do {
 			try recurringIdentity()
 			try legacyIdentity()
-			try seriesBoundaries()
 			try keysAndDecoding()
 			try queryWindowsAndDST()
 			print("CALENDAR OCCURRENCE CONTRACT: exact recurrence, calendar boundaries, ambiguity, legacy adoption, stable keys, Codable compatibility, and bounded DST queries passed")
@@ -94,28 +93,6 @@ enum CalendarOccurrenceContractChecks {
 		saved.calendarIdentifier = ""
 		try expect(CalendarOccurrenceIdentity.match(for: saved, among: [current]) == .missing,
 			"An unknown calendar must never widen exact occurrence selection")
-	}
-
-	private static func seriesBoundaries() throws {
-		let stored = event(id: "series", start: date)
-		let reference = EventSeriesReference(event: stored)
-		var candidate = stored
-		candidate.calendarIdentifier = "another-calendar"
-		try expect(!reference.matches(candidate), "Series matching must check calendar before an equal external identifier")
-		candidate.calendarIdentifier = stored.calendarIdentifier
-		candidate.externalIdentifier = "different-series"
-		try expect(!reference.matches(candidate), "Same-calendar title/time fallback must not override conflicting external series IDs")
-		var unknown = reference
-		unknown.calendarIdentifier = ""
-		try expect(!unknown.matches(stored), "A calendar title cannot disambiguate an absent calendar identifier")
-		var legacy = reference
-		legacy.externalIdentifier = nil
-		candidate.externalIdentifier = nil
-		candidate.title = "TEAM — REVIEW"
-		legacy.eventTitle = "team review"
-		try expect(legacy.matches(candidate), "Series fallback remains available for exact titles when a strong identifier is unavailable")
-		legacy.startMinuteOfDay = Int.min
-		try expect(!legacy.matches(candidate), "Malformed legacy time metadata must fail safely without overflowing date-distance arithmetic")
 	}
 
 	private static func keysAndDecoding() throws {

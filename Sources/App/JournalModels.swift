@@ -108,12 +108,9 @@ struct JournalEntry: Identifiable, Codable, Hashable, Sendable {
 		case calendarEvent
 		case summaryModel
 		case transcriptModel
-		case reminders
-		case reminderFeedback
-		case reminderModel
 		case analysis
-		case reminderHistory
-		case reminderProcessedFeedbackIDs
+		case tasks
+		case taskModel
 	}
 
 	let id: UUID
@@ -127,12 +124,9 @@ struct JournalEntry: Identifiable, Codable, Hashable, Sendable {
 	var calendarEvent: JournalCalendarEvent?
 	var summaryModel: String?
 	var transcriptModel: String?
-	var reminders: [EventReminderRule]
-	var reminderFeedback: [ReminderFeedback]
-	var reminderModel: String?
 	var analysis: MemoAnalysis?
-	var reminderHistory: [EventReminderRule]
-	var reminderProcessedFeedbackIDs: Set<UUID>
+	var tasks: [MemoTask]
+	var taskModel: String?
 
 	init(
 		id: UUID = UUID(),
@@ -146,12 +140,9 @@ struct JournalEntry: Identifiable, Codable, Hashable, Sendable {
 		calendarEvent: JournalCalendarEvent? = nil,
 		summaryModel: String? = nil,
 		transcriptModel: String? = nil,
-		reminders: [EventReminderRule] = [],
-		reminderFeedback: [ReminderFeedback] = [],
-		reminderModel: String? = nil,
 		analysis: MemoAnalysis? = nil,
-		reminderHistory: [EventReminderRule] = [],
-		reminderProcessedFeedbackIDs: Set<UUID> = []
+		tasks: [MemoTask] = [],
+		taskModel: String? = nil
 	) {
 		self.id = id
 		self.createdAt = createdAt
@@ -164,12 +155,9 @@ struct JournalEntry: Identifiable, Codable, Hashable, Sendable {
 		self.calendarEvent = calendarEvent
 		self.summaryModel = summaryModel
 		self.transcriptModel = transcriptModel
-		self.reminders = reminders
-		self.reminderFeedback = reminderFeedback
-		self.reminderModel = reminderModel
 		self.analysis = analysis
-		self.reminderHistory = reminderHistory
-		self.reminderProcessedFeedbackIDs = reminderProcessedFeedbackIDs
+		self.tasks = tasks
+		self.taskModel = taskModel
 	}
 
 	init(from decoder: Decoder) throws {
@@ -185,13 +173,9 @@ struct JournalEntry: Identifiable, Codable, Hashable, Sendable {
 		calendarEvent = try container.decodeIfPresent(JournalCalendarEvent.self, forKey: .calendarEvent)
 		summaryModel = try container.decodeIfPresent(String.self, forKey: .summaryModel)
 		transcriptModel = try container.decodeIfPresent(String.self, forKey: .transcriptModel)
-		reminders = try container.decodeIfPresent([EventReminderRule].self, forKey: .reminders) ?? []
-		reminderFeedback = try container.decodeIfPresent([ReminderFeedback].self, forKey: .reminderFeedback) ?? []
-		reminderModel = try container.decodeIfPresent(String.self, forKey: .reminderModel)
 		analysis = try container.decodeIfPresent(MemoAnalysis.self, forKey: .analysis)
-		reminderHistory = try container.decodeIfPresent([EventReminderRule].self, forKey: .reminderHistory) ?? []
-		reminderProcessedFeedbackIDs = try container.decodeIfPresent(Set<UUID>.self, forKey: .reminderProcessedFeedbackIDs)
-			?? Set(reminderFeedback.map(\.id))
+		tasks = try container.decodeIfPresent([MemoTask].self, forKey: .tasks) ?? []
+		taskModel = try container.decodeIfPresent(String.self, forKey: .taskModel)
 	}
 }
 
@@ -268,7 +252,7 @@ enum EntryProcessingPhase: Equatable, Sendable {
 	case transcribing
 	case queued
 	case reflecting
-	case reminders
+	case tasks
 	case complete
 
 	var title: String {
@@ -281,7 +265,7 @@ enum EntryProcessingPhase: Equatable, Sendable {
 		case .transcribing: "Transcribing"
 		case .queued: "Waiting"
 		case .reflecting: "Analyzing"
-		case .reminders: "Finding reminders"
+		case .tasks: "Finding tasks"
 		case .complete: "Ready"
 		}
 	}
@@ -317,85 +301,31 @@ extension JournalEntry {
 			location: "Lakefront Trail",
 			isRecurring: true
 		)
-		let nextMorningRun = JournalCalendarEvent(
-			id: "demo-morning-run-next",
-			externalIdentifier: "demo-morning-run-series",
-			calendarIdentifier: "demo-personal",
-			calendarTitle: "Personal",
-			title: "Morning run",
-			startDate: date(2026, 7, 26, 8, 0),
-			endDate: date(2026, 7, 26, 9, 0),
-			isAllDay: false,
-			location: "Lakefront Trail",
-			isRecurring: true
-		)
-		let eveningRun = JournalCalendarEvent(
-			id: "demo-evening-run",
-			calendarIdentifier: "demo-personal",
-			calendarTitle: "Personal",
-			title: "Evening run",
-			startDate: date(2026, 7, 25, 18, 30),
-			endDate: date(2026, 7, 25, 19, 30),
-			isAllDay: false,
-			location: "Lakefront Trail"
-		)
-		let runSeries = EventSeriesReference(event: morningRun)
 
 		return [
 			JournalEntry(
 				createdAt: date(2026, 7, 12, 8, 47),
 				duration: 94,
-				transcript: "The morning run felt good, but I faded early. Next time I should bring electrolytes. I should also ask Maya which dentist she recommended. For morning group runs this month I want to wear the red shorts so they are easy to spot.",
+				transcript: "The morning run felt good, but I faded early. Next time I should bring electrolytes. I should also ask Maya tomorrow which dentist she recommended. For morning group runs this month I want to wear the red shorts so they are easy to spot.",
 				summary: "The run felt encouraging, with a few concrete preparations you want to carry into the next one.",
 				headline: "The run felt good enough to plan for the next one.",
 				location: JournalLocation(latitude: 41.8781, longitude: -87.6298, city: "Chicago"),
 				calendarEvent: morningRun,
 				summaryModel: "SystemLanguageModel.default",
 				transcriptModel: "Apple Speech · en-US",
-				reminders: [
-					EventReminderRule(
-						text: "Bring electrolytes",
-						motivation: "You faded early during the last run.",
-						evidence: "Next time I should bring electrolytes.",
-						selector: .series(runSeries),
-						occurrencePolicy: .everyMatch,
-						createdAt: date(2026, 7, 12, 8, 47)
-					),
-					EventReminderRule(
-						text: "Ask Maya which dentist she recommended",
-						motivation: "You wanted to follow up with Maya at the next run.",
-						evidence: "I should also ask Maya which dentist she recommended.",
-						selector: .series(runSeries),
-						occurrencePolicy: .nextMatch,
-						createdAt: date(2026, 7, 12, 8, 47)
-					),
-					EventReminderRule(
-						text: "Wear the red shorts",
-						motivation: "You want them to be easy to spot at morning group runs.",
-						evidence: "For morning group runs this month I want to wear the red shorts.",
-						selector: .fuzzy(FuzzyEventSelector(
-							semanticDescription: "group run",
-							timeBucket: .morning,
-							locationDescription: nil,
-							examples: [
-								ReminderMatchExample(
-									event: nextMorningRun,
-									matches: true,
-									reason: "A morning group run."
-								),
-								ReminderMatchExample(
-									event: eveningRun,
-									matches: false,
-									reason: "The event is in the evening."
-								)
-							]
-						)),
-						occurrencePolicy: .everyMatch,
-						createdAt: date(2026, 7, 12, 8, 47),
-						expiresAt: date(2026, 8, 12, 8, 47)
-					)
+				tasks: [
+					MemoTask(key: UUID(uuidString: "D0000000-0000-4000-8000-000000000001")!, title: "Bring electrolytes",
+						notes: "You faded early on this run.\n\n“Next time I should bring electrolytes.”", when: nil,
+						event: TaskEventResolver.resolve(.every, attached: morningRun, events: [], recordedAt: date(2026, 7, 12, 8, 47),
+							now: date(2026, 7, 12, 8, 47))),
+					MemoTask(key: UUID(uuidString: "D0000000-0000-4000-8000-000000000002")!, title: "Ask Maya which dentist she recommended",
+						notes: "You want a dentist recommendation.\n\n“I should also ask Maya tomorrow which dentist she recommended.”",
+						when: "tomorrow", event: nil),
+					MemoTask(key: UUID(uuidString: "D0000000-0000-4000-8000-000000000003")!, title: "Wear the red shorts to morning group runs",
+						notes: "They make you easy to spot.\n\n“For morning group runs this month I want to wear the red shorts”",
+						when: "this month", event: nil),
 				],
-				reminderModel: "SystemLanguageModel.default · guided"
+				taskModel: TaskEngine.modelName
 			),
 			JournalEntry(
 				createdAt: date(2026, 7, 12, 7, 21),

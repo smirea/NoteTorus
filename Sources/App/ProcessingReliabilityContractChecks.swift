@@ -26,9 +26,8 @@ enum ProcessingReliabilityContractChecks {
 					return TranscriptionResult(transcript: "Finished the native background fixture", modelName: "Fixture")
 				}
 			}, reflect: { _, _ in ReflectionResult(headline: "Background fixture completed", modelName: "Fixture") },
-				reminders: { _ in ReminderParsingResult(reminders: [], modelName: "Fixture") })
+			tasks: { _, _ in TaskExtractionResult(tasks: [], modelName: "Fixture") })
 			let store = JournalStore(storageRootURL: root, processingServices: services, processingBackgroundTasks: background)
-			store.updateSetting(\.eventRemindersEnabled, false)
 			try await store.waitUntilLoaded()
 			await store.waitForConfigurationWritesForContract()
 			store.reprocessEntry(id: entry.id)
@@ -111,9 +110,9 @@ enum ProcessingReliabilityContractChecks {
 			throw Failure("A pre-restart attempt cannot commit")
 		} catch RepositoryError.staleProcessing {}
 		let advanced = try await repository.commitReflection(ReflectionResult(headline: "Saved", modelName: "Fixture"), lease: restarted.lease)
-		try expect(advanced.processing?.stage == .reminders && advanced.processing?.failedAttempts == 0, "Advancing starts a fresh stage budget")
-		let reminders = try await requireWork(repository)
-		let unavailable = try await repository.failProcessing(reminders.lease, message: "No model", kind: .unavailable)
+		try expect(advanced.processing?.stage == .tasks && advanced.processing?.failedAttempts == 0, "Advancing starts a fresh stage budget")
+		let tasks = try await requireWork(repository)
+		let unavailable = try await repository.failProcessing(tasks.lease, message: "No model", kind: .unavailable)
 		try expect(unavailable.processing?.retryAfter == nil, "Unavailable services wait for explicit retry")
 		_ = try await repository.retryProcessing(id: entry.id)
 		let unreadableWork = try await requireWork(repository)
@@ -132,7 +131,7 @@ enum ProcessingReliabilityContractChecks {
 		try expect(ProcessingDeadline.seconds(stage: .transcribe, entry: long) > long.duration,
 			"Unlimited recordings must not inherit a fixed short transcription cutoff")
 		long.transcript = String(repeating: "Whole memo ", count: 20_000)
-		try expect(ProcessingDeadline.seconds(stage: .reminders, entry: long) > ProcessingDeadline.seconds(stage: .reminders, entry: entry),
+		try expect(ProcessingDeadline.seconds(stage: .reflect, entry: long) > ProcessingDeadline.seconds(stage: .reflect, entry: entry),
 			"Analysis budgets must scale with input size")
 	}
 
@@ -144,9 +143,8 @@ enum ProcessingReliabilityContractChecks {
 		let services = ProcessingServices(transcribe: { _, _, _, _ in
 			try await ServiceAdmission.speech.run(timeout: .seconds(2)) { try await native.run() }
 		}, reflect: { _, _ in ReflectionResult(headline: "Finished", modelName: "Fixture") },
-			reminders: { _ in ReminderParsingResult(reminders: [], modelName: "Fixture") })
+			tasks: { _, _ in TaskExtractionResult(tasks: [], modelName: "Fixture") })
 		let store = JournalStore(storageRootURL: root, processingServices: services)
-		store.updateSetting(\.eventRemindersEnabled, false)
 		try await store.waitUntilLoaded()
 		await store.waitForConfigurationWritesForContract()
 
@@ -207,9 +205,8 @@ enum ProcessingReliabilityContractChecks {
 		let services = ProcessingServices(transcribe: { _, _, _, _ in
 			try await ServiceAdmission.speech.run(timeout: .seconds(5)) { try await native.run() }
 		}, reflect: { _, _ in ReflectionResult(headline: "Retried successfully", modelName: "Fixture") },
-			reminders: { _ in ReminderParsingResult(reminders: [], modelName: "Fixture") })
+			tasks: { _, _ in TaskExtractionResult(tasks: [], modelName: "Fixture") })
 		let store = JournalStore(storageRootURL: root, processingServices: services)
-		store.updateSetting(\.eventRemindersEnabled, false)
 		do {
 			try await wait { await blocker.starts == 1 }
 			try await store.waitUntilLoaded()
@@ -321,9 +318,8 @@ enum ProcessingReliabilityContractChecks {
 		let services = ProcessingServices(transcribe: { _, _, _, _ in
 			try await ServiceAdmission.speech.run { try await native.run() }
 		}, reflect: { _, _ in ReflectionResult(headline: "Finished in background", modelName: "Fixture") },
-			reminders: { _ in ReminderParsingResult(reminders: [], modelName: "Fixture") })
+			tasks: { _, _ in TaskExtractionResult(tasks: [], modelName: "Fixture") })
 		let store = JournalStore(storageRootURL: root, processingServices: services, processingBackgroundTasks: background)
-		store.updateSetting(\.eventRemindersEnabled, false)
 		try await store.waitUntilLoaded()
 		await store.waitForConfigurationWritesForContract()
 		do {
@@ -384,7 +380,7 @@ enum ProcessingReliabilityContractChecks {
 	private static func temporaryFileChecks() throws {
 		let root = try temporaryRoot()
 		defer { try? FileManager.default.removeItem(at: root) }
-		let oldNames = ["speech-input-\(UUID()).caf", "elevenlabs-\(UUID()).multipart", "reminder-feedback-\(UUID()).m4a"]
+		let oldNames = ["speech-input-\(UUID()).caf", "elevenlabs-\(UUID()).multipart"]
 		let protectedNames = ["speech-input-original.caf", "elevenlabs-\(UUID()).m4a", "\(UUID()).m4a", "speech-input-\(UUID()).caf"]
 		for name in oldNames + protectedNames { try Data([1]).write(to: root.appendingPathComponent(name)) }
 		let cutoff = Date.now.addingTimeInterval(-5)

@@ -15,7 +15,7 @@ enum ProcessingRepositoryContractChecks {
 			try await completionChecks()
 			try await migrationChecks()
 			try await analysisChecks()
-			print("PROCESSING REPOSITORY CONTRACT: durable stages, restart/cancellation, stale leases, write failure retry, narrow edits, skipped outcomes, and deletion passed")
+			print("PROCESSING REPOSITORY CONTRACT: durable stages, restart/cancellation, stale leases, write failure retry, narrow edits, retired reminder decoding, and deletion passed")
 			fflush(stdout)
 		} catch { fatalError("PROCESSING REPOSITORY CONTRACT: \(error)") }
 	}
@@ -70,20 +70,15 @@ enum ProcessingRepositoryContractChecks {
 		try expect(resumed.attemptID != reflection.attemptID && resumed.requestID == reflection.requestID,
 			"A running stage must relaunch queued and acquire a fresh attempt")
 		try await stale { _ = try await interruptedAgain.commitReflection(reflectionResult, lease: reflection) }
-		_ = try await interruptedAgain.commitReflection(reflectionResult, lease: resumed)
-		let reflectedRestart = JournalRepository(rootURL: root)
-		_ = try await reflectedRestart.load()
-		let reminders = try await claim(reflectedRestart, stage: .reminders)
-		try expect(reminders.requestID == resumed.requestID, "Restart after reflection must resume reminders in the same request")
-		_ = try await reflectedRestart.pauseProcessing(reminders, canceled: true)
+		_ = try await interruptedAgain.pauseProcessing(resumed, canceled: true)
 		let canceledRestart = JournalRepository(rootURL: root)
 		_ = try await canceledRestart.load()
 		let canceledWork = try await canceledRestart.claimProcessing(now: .distantFuture)
 		let canceled = await canceledRestart.record(id: entry.id)
 		try expect(canceledWork == nil && canceled?.processing?.status == .canceled,
 			"Explicit cancellation must survive launch and must not be automatically retried")
-		try expect(canceled?.entry?.transcript == "Durable transcript" && canceled?.entry?.headline == reflectionResult.headline
-			&& canceled?.processing?.completedStages.isSuperset(of: [.transcribe, .reflect]) == true,
+		try expect(canceled?.entry?.transcript == "Durable transcript"
+			&& canceled?.processing?.completedStages.contains(.transcribe) == true,
 			"Canceling a later stage must preserve the previous stage's committed output")
 	}
 
@@ -174,26 +169,10 @@ enum ProcessingRepositoryContractChecks {
 		_ = try await repository.apply(.location(location), to: entry.id)
 		let reflection = try await claim(repository, stage: .reflect)
 		_ = try await repository.commitReflection(reflectionResult, lease: reflection)
-		let extraction = try await claim(repository, stage: .reminders)
-		let rule = entry.reminders[0]
-		let removal = ReminderFeedback(kind: .manualRemoval, text: "Keep removed", focusedReminderID: rule.id)
-		let edited = try await repository.apply(.removeReminder(rule.id, removal), to: entry.id)
-		let repeated = try await repository.apply(.removeReminder(rule.id, removal), to: entry.id)
-		try expect(repeated.entry?.reminderFeedback.count == 1 && repeated.inputRevision == edited.inputRevision,
-			"Retrying the same narrow removal must not duplicate feedback or advance inputs twice")
-		try await stale { _ = try await repository.commitReminders(.init(reminders: [rule], modelName: "stale"), lease: extraction) }
-		let current = try await claim(repository, stage: .reminders)
-		_ = try await repository.commitReminders(.init(reminders: [], modelName: "new reminders"), lease: current)
 		let committed = try diskRecord(entry.id, root: root)
 		try expect(committed.entry?.transcript == "Fresh transcript" && committed.entry?.headline == reflectionResult.headline
-			&& committed.entry?.location == location && committed.entry?.reminders.isEmpty == true,
-			"Delayed location/reminder edits must preserve newly committed stage outputs")
-		let feedback = ReminderFeedback(kind: .voice, text: "Different upcoming event")
-		let changed = try await repository.apply(.feedback(feedback), to: entry.id)
-		let retried = try await repository.apply(.feedback(feedback), to: entry.id)
-		try expect(retried.entry?.reminderFeedback.filter { $0.id == feedback.id }.count == 1
-			&& retried.processing?.requestID == changed.processing?.requestID && retried.processing?.stage == .reminders,
-			"Retrying committed feedback must retain one feedback ID and one reminder request")
+			&& committed.entry?.location == location,
+			"Delayed location edits must preserve newly committed stage outputs")
 	}
 
 	private static func completionChecks() async throws {
@@ -202,25 +181,35 @@ enum ProcessingRepositoryContractChecks {
 		let (repository, entry) = try await seed(root, headline: "Processing ideas for next week")
 		let migrated = await repository.record(id: entry.id)
 		try expect(migrated?.processing?.status == .complete, "An arbitrary completed headline must not trigger a legacy requeue")
-		_ = try await repository.requestProcessing(id: entry.id, startAt: .reminders)
-		let noEvent = try await claim(repository, stage: .reminders)
-		_ = try await repository.commitReminders(nil, lease: noEvent)
-		try expect(try diskRecord(entry.id, root: root).processing?.skippedStages.contains(.reminders) == true,
-			"A disabled/inapplicable reminder stage must persist an explicit skip")
-		_ = try await repository.requestProcessing(id: entry.id, startAt: .reminders)
-		let skipped = try await claim(repository, stage: .reminders)
-		_ = try await repository.commitReminders(.init(reminders: [], modelName: nil, outcome: .skipped), lease: skipped)
-		try expect(try diskRecord(entry.id, root: root).processing?.skippedStages.contains(.reminders) == true,
-			"A model's skipped outcome must persist as skipped")
-		_ = try await repository.requestProcessing(id: entry.id, startAt: .reminders)
-		let emptySuccess = try await claim(repository, stage: .reminders)
-		_ = try await repository.commitReminders(.init(reminders: [], modelName: "fixture", outcome: .complete), lease: emptySuccess)
-		let restarted = JournalRepository(rootURL: root)
-		_ = try await restarted.load()
-		let completed = await restarted.record(id: entry.id)
-		let work = try await restarted.claimProcessing(now: .distantFuture)
-		try expect(completed?.processing?.status == .complete && completed?.processing?.skippedStages.contains(.reminders) == false && work == nil,
-			"Successful extraction of zero reminders must remain distinguishable from skipped and must not requeue")
+		let manifest = recordURL(entry.id, root: root)
+		var old = try JSONSerialization.jsonObject(with: Data(contentsOf: manifest)) as! [String: Any]
+		var oldEntry = old["entry"] as! [String: Any]
+		oldEntry["reminders"] = [["text": "Bring notes", "selector": ["retired": true]]]
+		oldEntry["reminderFeedback"] = [["kind": "voice", "text": "Retired correction"]]
+		oldEntry["reminderModel"] = "retired model"
+		old["entry"] = oldEntry
+		var oldJob = old["processing"] as! [String: Any]
+		oldJob["stage"] = "reminders"
+		oldJob["status"] = "complete"
+		oldJob["completedStages"] = ["finalizeAudio", "transcribe", "reflect", "reminders"]
+		oldJob["skippedStages"] = ["reminders"]
+		old["processing"] = oldJob
+		try JSONSerialization.data(withJSONObject: old).write(to: manifest)
+		let legacy = JournalRepository(rootURL: root)
+		let loaded = try await legacy.load()
+		let record = loaded.records.first { $0.id == entry.id }
+		let legacyWork = try await legacy.claimProcessing(now: .distantFuture)
+		try expect(loaded.issues.isEmpty && record?.entry?.transcript == entry.transcript && record?.entry?.tasks.isEmpty == true
+			&& record?.processing?.status == .complete && record?.processing?.completedStages.contains(.tasks) == true
+			&& record?.taskDelivery == .notExtracted && legacyWork == nil,
+			"A note that finished reminders loads as complete and is not sent to ProcrastiMate")
+		oldJob["status"] = "queued"
+		oldJob["completedStages"] = ["finalizeAudio", "transcribe", "reflect"]
+		old["processing"] = oldJob
+		try JSONSerialization.data(withJSONObject: old).write(to: manifest)
+		let resumed = JournalRepository(rootURL: root)
+		_ = try await resumed.load()
+		_ = try await claim(resumed, stage: .tasks)
 	}
 
 	private static func migrationChecks() async throws {
@@ -285,10 +274,8 @@ enum ProcessingRepositoryContractChecks {
 		let repository = JournalRepository(rootURL: root)
 		_ = try await repository.load()
 		let id = UUID()
-		let reminder = EventReminderRule(text: "Bring notes", motivation: "Prepare", evidence: "Bring notes",
-			selector: .fuzzy(.init(semanticDescription: "Meeting", timeBucket: .any, locationDescription: nil, examples: [])), occurrencePolicy: .everyMatch)
 		let entry = JournalEntry(id: id, duration: 0.1, transcript: "Prior complete transcript", summary: "Prior complete analysis",
-			headline: headline, audioFilename: "\(id.uuidString).m4a", summaryModel: "old model", transcriptModel: "old speech", reminders: [reminder])
+			headline: headline, audioFilename: "\(id.uuidString).m4a", summaryModel: "old model", transcriptModel: "old speech")
 		try writeAudio(root.appendingPathComponent("Recordings/\(entry.audioFilename!)"))
 		try await repository.save([entry])
 		let restarted = JournalRepository(rootURL: root)

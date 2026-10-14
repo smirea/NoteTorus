@@ -177,9 +177,7 @@ final class RecordingSession {
 				activityCaptureID = captureID
 				activityState = makeActivityState(status: status, elapsed: recorder.duration, at: date)
 				activityManager.start(captureID: captureID, startedAt: date, state: activityState!) { [weak self] in
-					guard let self, self.generation == generation else { return false }
-					let released = await self.store.waitForReminderActivitiesToEnd(owner: generation)
-					return released && self.generation == generation
+					self?.generation == generation
 				}
 				startHeartbeat(generation: generation)
 			}

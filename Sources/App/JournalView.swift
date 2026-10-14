@@ -107,21 +107,7 @@ struct JournalView: View {
 			.padding(.horizontal, 20)
 			.padding(.bottom, 18)
 		}
-		.alert(
-			"Delete voice memo?",
-			isPresented: Binding(
-				get: { entryPendingDeletion != nil },
-				set: { if !$0 { entryPendingDeletion = nil } }
-			),
-			presenting: entryPendingDeletion
-		) { entry in
-			Button("Delete", role: .destructive) {
-				Task { await store.deleteEntry(id: entry.id) }
-			}
-			Button("Cancel", role: .cancel) {}
-		} message: { _ in
-			Text("This permanently deletes the note and its recording.")
-		}
+		.modifier(MemoDeletionConfirmation(store: store, entry: $entryPendingDeletion))
 	}
 
 	private var header: some View {

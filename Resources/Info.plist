@@ -57,6 +57,7 @@
 	<array>
 		<string>comgooglemaps</string>
 		<string>googlecalendar</string>
+		<string>procrastimate</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict>

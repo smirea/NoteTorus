@@ -16,7 +16,7 @@ import time
 import uuid
 
 ROOT = Path(__file__).resolve().parents[1]
-BUNDLE = "com.stefan.myvoicememo"
+BUNDLE = "com.stefan.talkward"
 
 
 class CheckFailure(Exception):
@@ -27,7 +27,7 @@ def contract_manifest():
     manifest = json.loads((ROOT / "Scripts/simulator-checks.json").read_text())
     contracts = manifest["contracts"]
     names = [item["name"] for item in contracts]
-    app = (ROOT / "Sources/App/VoiceMemoApp.swift").read_text()
+    app = (ROOT / "Sources/App/TalkwardApp.swift").read_text()
     registered = re.findall(r"await\s+(\w+)\.runFromLaunchArguments\s*\(", app)
     registered = [name for name in registered if name != "LocalModelProbe"]
     if not contracts or len(names) != len(set(names)) or names != registered:
@@ -93,16 +93,16 @@ def application(args, artifacts):
     else:
         derived = artifacts / "DerivedData"
         print(f"Building Debug. Log: {artifacts / 'build.log'}", flush=True)
-        command(["xcodebuild", "-project", str(ROOT / "VoiceMemo.xcodeproj"), "-scheme", "VoiceMemo",
+        command(["xcodebuild", "-project", str(ROOT / "Talkward.xcodeproj"), "-scheme", "Talkward",
                  "-configuration", "Debug", "-destination", f"platform=iOS Simulator,id={args.device}",
                  "-derivedDataPath", str(derived), "CODE_SIGNING_ALLOWED=NO", "build"],
                 artifacts / "build.log", timeout=args.build_timeout)
-        app = derived / "Build/Products/Debug-iphonesimulator/MyVoiceMemo.app"
+        app = derived / "Build/Products/Debug-iphonesimulator/Talkward.app"
     with (app / "Info.plist").open("rb") as source:
         info = plistlib.load(source)
     executable = info.get("CFBundleExecutable", "")
     if info.get("CFBundleIdentifier") != BUNDLE or "iPhoneSimulator" not in info.get("CFBundleSupportedPlatforms", []):
-        raise CheckFailure("--app must be the MyVoiceMemo iOS Simulator Debug bundle.")
+        raise CheckFailure("--app must be the Talkward iOS Simulator Debug bundle.")
     if not executable or Path(executable).name != executable or not (app / executable).is_file():
         raise CheckFailure("The Simulator app executable is missing.")
     return app
@@ -162,7 +162,7 @@ def positive_seconds(value):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--device", help="Explicit iOS Simulator UUID; never selected automatically")
-    parser.add_argument("--app", type=Path, help="Existing MyVoiceMemo.app Debug Simulator bundle; skips building")
+    parser.add_argument("--app", type=Path, help="Existing Talkward.app Debug Simulator bundle; skips building")
     parser.add_argument("--artifacts", type=Path, help="New output directory (default: a new system temporary directory)")
     parser.add_argument("--timeout", type=positive_seconds, default=180, help="Deadline per app run in seconds (default: 180)")
     parser.add_argument("--build-timeout", type=positive_seconds, default=600, help="Build deadline in seconds (default: 600)")
@@ -184,7 +184,7 @@ def main():
         artifacts = args.artifacts.resolve()
         artifacts.mkdir(parents=True, exist_ok=False)
     else:
-        artifacts = Path(tempfile.mkdtemp(prefix="myvoicememo-checks-"))
+        artifacts = Path(tempfile.mkdtemp(prefix="talkward-checks-"))
     print(f"Artifacts: {artifacts}", flush=True)
     prepare_device(args.device, artifacts)
     app = application(args, artifacts)

@@ -2,12 +2,12 @@
 import PackageDescription
 
 let package = Package(
-	name: "ios-voice-memo",
+	name: "Talkward",
 	platforms: [
 		.iOS(.v26),
 	],
 	products: [
-		.executable(name: "ios-voice-memo", targets: ["App"]),
+		.executable(name: "Talkward", targets: ["App"]),
 	],
 	targets: [
 		.executableTarget(name: "App"),

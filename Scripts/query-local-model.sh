@@ -20,8 +20,8 @@ if [ -z "$device_id" ]; then
 	exit 1
 fi
 
-derived_data="${TMPDIR:-/tmp}/MyVoiceMemoModelProbe"
-build_log="$(mktemp -t myvoicememo-model-probe)"
+derived_data="${TMPDIR:-/tmp}/TalkwardModelProbe"
+build_log="$(mktemp -t talkward-model-probe)"
 output_path=""
 
 cleanup() {
@@ -35,8 +35,8 @@ trap cleanup EXIT
 
 echo "Building the simulator probe…" >&2
 if ! xcodebuild \
-	-project "$project_root/VoiceMemo.xcodeproj" \
-	-scheme VoiceMemo \
+	-project "$project_root/Talkward.xcodeproj" \
+	-scheme Talkward \
 	-configuration Debug \
 	-destination "platform=iOS Simulator,id=$device_id" \
 	-derivedDataPath "$derived_data" \
@@ -46,9 +46,9 @@ then
 	exit 1
 fi
 
-app_path="$derived_data/Build/Products/Debug-iphonesimulator/MyVoiceMemo.app"
+app_path="$derived_data/Build/Products/Debug-iphonesimulator/Talkward.app"
 xcrun simctl install "$device_id" "$app_path" >/dev/null 2>&1
-data_container="$(xcrun simctl get_app_container "$device_id" com.stefan.myvoicememo data)"
+data_container="$(xcrun simctl get_app_container "$device_id" com.stefan.talkward data)"
 output_path="$data_container/tmp/local-model-probe.txt"
 if [ -f "$output_path" ]; then
 	trash "$output_path"
@@ -59,7 +59,7 @@ xcrun simctl launch \
 	--terminate-running-process \
 	--console-pty \
 	"$device_id" \
-	com.stefan.myvoicememo \
+	com.stefan.talkward \
 	-demo \
 	-local-model-prompt \
 	"$prompt" >/dev/null 2>&1

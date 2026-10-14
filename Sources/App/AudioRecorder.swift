@@ -782,7 +782,7 @@ private enum ElevenLabsTranscriber {
 
 	static func transcribe(url: URL, apiKey: String) async throws -> TranscriptionResult {
 		try Task.checkCancellation()
-		let boundary = "MyVoiceMemo-\(UUID().uuidString)"
+		let boundary = "Talkward-\(UUID().uuidString)"
 		let bodyURL = try multipartBody(audioURL: url, boundary: boundary)
 		defer { try? FileManager.default.removeItem(at: bodyURL) }
 

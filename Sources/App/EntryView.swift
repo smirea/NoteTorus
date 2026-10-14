@@ -401,7 +401,7 @@ private struct JournalEntryExport: Identifiable {
 		id = entry.id
 		let data = try entry.jsonData()
 		fileURL = FileManager.default.temporaryDirectory
-			.appendingPathComponent("MyVoiceMemo_\(entry.id.uuidString).json")
+			.appendingPathComponent("Talkward_\(entry.id.uuidString).json")
 		jsonText = String(decoding: data, as: UTF8.self)
 		try data.write(to: fileURL, options: .atomic)
 	}
@@ -417,7 +417,7 @@ private final class CopyJSONTextActivity: UIActivity {
 
 	override class var activityCategory: UIActivity.Category { .action }
 	override var activityType: UIActivity.ActivityType? {
-		UIActivity.ActivityType("com.stefan.myvoicememo.copy-json-text")
+		UIActivity.ActivityType("com.stefan.talkward.copy-json-text")
 	}
 	override var activityTitle: String? { "Copy JSON Text" }
 	override var activityImage: UIImage? { UIImage(systemName: "doc.on.doc") }

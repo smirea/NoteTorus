@@ -117,7 +117,7 @@ final class JournalStore {
 		configurationInitialValue = initialConfiguration
 		configurationIntentValue = initialConfiguration
 		let applicationSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-		rootURL = storageRootURL ?? applicationSupport.appendingPathComponent("MyVoiceMemo", isDirectory: true)
+		rootURL = storageRootURL ?? applicationSupport.appendingPathComponent("Talkward", isDirectory: true)
 		recordingsURL = rootURL.appendingPathComponent("Recordings", isDirectory: true)
 		repository = JournalRepository(rootURL: rootURL)
 		configurationRepository = ConfigurationRepository(rootURL: rootURL)

@@ -2,12 +2,12 @@
 import PackageDescription
 
 let package = Package(
-	name: "Talkward",
+	name: "NoteTorus",
 	platforms: [
 		.iOS(.v26),
 	],
 	products: [
-		.executable(name: "Talkward", targets: ["App"]),
+		.executable(name: "NoteTorus", targets: ["App"]),
 	],
 	targets: [
 		.executableTarget(name: "App"),

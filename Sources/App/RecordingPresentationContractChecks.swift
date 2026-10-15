@@ -95,16 +95,16 @@ enum RecordingPresentationContractChecks {
 			"The native activity must open its existing capture identity, never the new-recording widget route")
 		try expect(AppDeepLink(url: legacyAttributes.recordingURL) == .recording(nil),
 			"An older activity without a capture ID must open Home rather than start a replacement recording")
-		for raw in ["talkward://recording", "talkward://recording?id=invalid",
-			"talkward://recording?id=\(id)&id=\(UUID())", "talkward://recording?action=record"] {
+		for raw in ["notetorus://recording", "notetorus://recording?id=invalid",
+			"notetorus://recording?id=\(id)&id=\(UUID())", "notetorus://recording?action=record"] {
 			try expect(AppDeepLink(url: URL(string: raw)!) == .recording(nil),
 				"Missing or ambiguous recording identity must remain a non-recording route")
 		}
-		try expect(AppDeepLink(url: URL(string: "talkward://record")!) == .record
-			&& AppDeepLink(url: URL(string: "talkward://entry?id=\(id)")!) == .entry(id),
+		try expect(AppDeepLink(url: URL(string: "notetorus://record")!) == .record
+			&& AppDeepLink(url: URL(string: "notetorus://entry?id=\(id)")!) == .entry(id),
 			"The explicit microphone widget and existing note links must retain their separate routes")
 		try expect(AppDeepLink(url: URL(string: "https://recording?id=\(id)")!) == nil
-			&& AppDeepLink(url: URL(string: "talkward://entry?id=invalid")!) == nil,
+			&& AppDeepLink(url: URL(string: "notetorus://entry?id=invalid")!) == nil,
 			"Unrelated or malformed note URLs must not become recording actions")
 	}
 

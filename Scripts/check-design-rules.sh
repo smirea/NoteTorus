@@ -5,7 +5,7 @@ project_root="${SRCROOT:-$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)}"
 cd "$project_root"
 
 for pattern in 'RoundedRectangle' 'ContainerRelativeShape' 'GroupBox' 'AppCard' 'AppStyle\.card' 'cardBorder'; do
-	matches=$(/usr/bin/grep -R -n -E --include='*.swift' "$pattern" Sources/App Shared TalkwardWidgets || true)
+	matches=$(/usr/bin/grep -R -n -E --include='*.swift' "$pattern" Sources/App Shared NoteTorusWidgets || true)
 	if [ -n "$matches" ]; then
 		echo "error: NO CARDS design rule violation: $pattern"
 		echo "$matches"
@@ -13,7 +13,7 @@ for pattern in 'RoundedRectangle' 'ContainerRelativeShape' 'GroupBox' 'AppCard' 
 	fi
 done
 
-backgrounds=$(/usr/bin/grep -R -n -E --include='*.swift' '\.background\(' Sources/App Shared TalkwardWidgets || true)
+backgrounds=$(/usr/bin/grep -R -n -E --include='*.swift' '\.background\(' Sources/App Shared NoteTorusWidgets || true)
 invalid_backgrounds=$(printf '%s\n' "$backgrounds" | /usr/bin/grep -v -E '\.background\((AppStyle\.background|NativeBackSwipeEnabler\(\)|AppStyle\.accent, in: (Capsule|Circle)\(\))\)' || true)
 if [ -n "$invalid_backgrounds" ]; then
 	echo "error: NO CARDS design rule violation: unapproved background"

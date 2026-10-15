@@ -333,7 +333,8 @@ actor ICloudDriveMirror {
 			try check()
 			try Self.requireRegularDestination(url)
 			let timestamp = Int64(Date().timeIntervalSince1970 * 1_000)
-			let stagingURL = url.deletingLastPathComponent().appendingPathComponent(".notouroboros-\(timestamp)-\(UUID().uuidString).upload")
+			// The staging prefix keeps the NoteTorus name so cleanup still finds files left by earlier versions in the same container.
+			let stagingURL = url.deletingLastPathComponent().appendingPathComponent(".notetorus-\(timestamp)-\(UUID().uuidString).upload")
 			defer { try? FileManager.default.removeItem(at: stagingURL) }
 			try FileManager.default.copyItem(at: sourceURL, to: stagingURL)
 			try check()
@@ -434,8 +435,8 @@ actor ICloudDriveMirror {
 
 	nonisolated private static func uploadCreatedAt(_ url: URL) -> Date? {
 		let name = url.lastPathComponent
-		guard name.hasPrefix(".notouroboros-"), name.hasSuffix(".upload") else { return nil }
-		let stem = String(name.dropFirst(".notouroboros-".count).dropLast(".upload".count))
+		guard name.hasPrefix(".notetorus-"), name.hasSuffix(".upload") else { return nil }
+		let stem = String(name.dropFirst(".notetorus-".count).dropLast(".upload".count))
 		guard stem.count > 37, stem.dropLast(36).hasSuffix("-"), canonicalUUID(String(stem.suffix(36))) != nil,
 			let timestamp = Int64(stem.dropLast(37)), timestamp > 0 else { return nil }
 		return Date(timeIntervalSince1970: Double(timestamp) / 1_000)

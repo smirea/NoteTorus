@@ -154,16 +154,16 @@ enum ICloudProviderContractChecks {
 		let launchedAt = Date()
 		let oldTimestamp = Int64(launchedAt.addingTimeInterval(-10).timeIntervalSince1970 * 1_000)
 		let recentTimestamp = Int64(launchedAt.addingTimeInterval(10).timeIntervalSince1970 * 1_000)
-		let old = fixture.documents.appendingPathComponent(".notouroboros-\(oldTimestamp)-\(UUID().uuidString).upload")
-		let recent = fixture.documents.appendingPathComponent(".notouroboros-\(recentTimestamp)-\(UUID().uuidString).upload")
+		let old = fixture.documents.appendingPathComponent(".notetorus-\(oldTimestamp)-\(UUID().uuidString).upload")
+		let recent = fixture.documents.appendingPathComponent(".notetorus-\(recentTimestamp)-\(UUID().uuidString).upload")
 		let protected = [recent, fixture.documents.appendingPathComponent(".\(UUID().uuidString).upload"),
-			fixture.documents.appendingPathComponent(".notouroboros-\(UUID().uuidString).upload"),
-			fixture.documents.appendingPathComponent(".notouroboros-not-a-uuid.upload"), fixture.documents.appendingPathComponent(".unrelated")]
+			fixture.documents.appendingPathComponent(".notetorus-\(UUID().uuidString).upload"),
+			fixture.documents.appendingPathComponent(".notetorus-not-a-uuid.upload"), fixture.documents.appendingPathComponent(".unrelated")]
 		for url in [old] + protected {
 			try Data("preserve".utf8).write(to: url)
 			try FileManager.default.setAttributes([.modificationDate: launchedAt.addingTimeInterval(url == old ? 10 : -10)], ofItemAtPath: url.path)
 		}
-		let directory = fixture.documents.appendingPathComponent(".notouroboros-\(oldTimestamp)-\(UUID().uuidString).upload", isDirectory: true)
+		let directory = fixture.documents.appendingPathComponent(".notetorus-\(oldTimestamp)-\(UUID().uuidString).upload", isDirectory: true)
 		try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
 		let mirror = ICloudDriveMirror(containerURL: fixture.cloud, launchedAt: launchedAt)
 		let result = await fixture.sync(mirror)
@@ -201,7 +201,7 @@ enum ICloudProviderContractChecks {
 		let launchedAt = Date()
 		let timestamp = Int64(launchedAt.addingTimeInterval(-10).timeIntervalSince1970 * 1_000)
 		for _ in 0..<40 {
-			let url = fixture.documents.appendingPathComponent(".notouroboros-\(timestamp)-\(UUID().uuidString).upload")
+			let url = fixture.documents.appendingPathComponent(".notetorus-\(timestamp)-\(UUID().uuidString).upload")
 			try Data("abandoned".utf8).write(to: url)
 		}
 		let mirror = ICloudDriveMirror(containerURL: fixture.cloud, launchedAt: launchedAt)

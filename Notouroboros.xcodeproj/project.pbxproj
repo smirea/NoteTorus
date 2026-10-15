@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		A1000000000000000000005F /* ProcessingBackgroundTasks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000005F /* ProcessingBackgroundTasks.swift */; };
-		A10000000000000000000001 /* NoteTorusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* NoteTorusApp.swift */; };
+		A10000000000000000000001 /* NotouroborosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* NotouroborosApp.swift */; };
 		A10000000000000000000002 /* JournalModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* JournalModels.swift */; };
 		D1F357205DF988A6A87C8C34 /* ProcrastiMateClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C142640586B500598803524D /* ProcrastiMateClient.swift */; };
 		D10524AADC104B75224D284D /* TaskEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18409F2E84CC60D97BCD1B3 /* TaskEngine.swift */; };
@@ -27,9 +27,9 @@
 		A1000000000000000000000D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000E /* Assets.xcassets */; };
 		A1000000000000000000000E /* RecordingActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000F /* RecordingActivityManager.swift */; };
 		A1000000000000000000000F /* RecordingActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000010 /* RecordingActivityAttributes.swift */; };
-		A10000000000000000000010 /* NoteTorusWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* NoteTorusWidgets.swift */; };
+		A10000000000000000000010 /* NotouroborosWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* NotouroborosWidgets.swift */; };
 		A10000000000000000000011 /* RecordingActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000010 /* RecordingActivityAttributes.swift */; };
-		A10000000000000000000012 /* NoteTorusWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C10000000000000000000002 /* NoteTorusWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A10000000000000000000012 /* NotouroborosWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C10000000000000000000002 /* NotouroborosWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A10000000000000000000013 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000013 /* PrivacyInfo.xcprivacy */; };
 		A10000000000000000000014 /* EntryLocationCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000014 /* EntryLocationCapture.swift */; };
 		A10000000000000000000015 /* ICloudDriveMirror.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000015 /* ICloudDriveMirror.swift */; };
@@ -90,7 +90,7 @@
 			containerPortal = J10000000000000000000001 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = F10000000000000000000002;
-			remoteInfo = NoteTorusWidgets;
+			remoteInfo = NotouroborosWidgets;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -101,7 +101,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				A10000000000000000000012 /* NoteTorusWidgets.appex in Embed App Extensions */,
+				A10000000000000000000012 /* NotouroborosWidgets.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -110,7 +110,7 @@
 
 /* Begin PBXFileReference section */
 		B1000000000000000000005F /* ProcessingBackgroundTasks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingBackgroundTasks.swift; sourceTree = "<group>"; };
-		B10000000000000000000001 /* NoteTorusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteTorusApp.swift; sourceTree = "<group>"; };
+		B10000000000000000000001 /* NotouroborosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotouroborosApp.swift; sourceTree = "<group>"; };
 		B10000000000000000000002 /* JournalModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalModels.swift; sourceTree = "<group>"; };
 		C142640586B500598803524D /* ProcrastiMateClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcrastiMateClient.swift; sourceTree = "<group>"; };
 		C18409F2E84CC60D97BCD1B3 /* TaskEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskEngine.swift; sourceTree = "<group>"; };
@@ -130,12 +130,12 @@
 		B1000000000000000000000E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B1000000000000000000000F /* RecordingActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingActivityManager.swift; sourceTree = "<group>"; };
 		B10000000000000000000010 /* RecordingActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingActivityAttributes.swift; sourceTree = "<group>"; };
-		B10000000000000000000011 /* NoteTorusWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteTorusWidgets.swift; sourceTree = "<group>"; };
+		B10000000000000000000011 /* NotouroborosWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotouroborosWidgets.swift; sourceTree = "<group>"; };
 		B10000000000000000000012 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B10000000000000000000013 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		B10000000000000000000014 /* EntryLocationCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryLocationCapture.swift; sourceTree = "<group>"; };
 		B10000000000000000000015 /* ICloudDriveMirror.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudDriveMirror.swift; sourceTree = "<group>"; };
-		B10000000000000000000016 /* NoteTorus.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NoteTorus.entitlements; sourceTree = "<group>"; };
+		B10000000000000000000016 /* Notouroboros.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Notouroboros.entitlements; sourceTree = "<group>"; };
 		B10000000000000000000017 /* AudioPlayback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayback.swift; sourceTree = "<group>"; };
 		B10000000000000000000018 /* CalendarSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSync.swift; sourceTree = "<group>"; };
 		B10000000000000000000021 /* LocationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationModels.swift; sourceTree = "<group>"; };
@@ -143,8 +143,8 @@
 		B10000000000000000000023 /* LocationContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationContractChecks.swift; sourceTree = "<group>"; };
 		B10000000000000000000025 /* LocalModelProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalModelProbe.swift; sourceTree = "<group>"; };
 		C1166CEC9B9B4958FB6F5FCB /* MemoSeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoSeed.swift; sourceTree = "<group>"; };
-		C10000000000000000000001 /* NoteTorus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NoteTorus.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C10000000000000000000002 /* NoteTorusWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NoteTorusWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C10000000000000000000001 /* Notouroboros.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Notouroboros.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C10000000000000000000002 /* NotouroborosWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotouroborosWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		B10000000000000000000026 /* RecordingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingSession.swift; sourceTree = "<group>"; };
 		B10000000000000000000027 /* RecordingContractChecks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingContractChecks.swift; sourceTree = "<group>"; };
 		B10000000000000000000028 /* AudioSessionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSessionController.swift; sourceTree = "<group>"; };
@@ -213,7 +213,7 @@
 				E10000000000000000000002 /* Sources */,
 				E10000000000000000000003 /* Resources */,
 				E10000000000000000000005 /* Shared */,
-				E10000000000000000000006 /* NoteTorusWidgets */,
+				E10000000000000000000006 /* NotouroborosWidgets */,
 				E10000000000000000000004 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -221,7 +221,7 @@
 		E10000000000000000000002 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				B10000000000000000000001 /* NoteTorusApp.swift */,
+				B10000000000000000000001 /* NotouroborosApp.swift */,
 				B10000000000000000000002 /* JournalModels.swift */,
 				C142640586B500598803524D /* ProcrastiMateClient.swift */,
 				C18409F2E84CC60D97BCD1B3 /* TaskEngine.swift */,
@@ -298,7 +298,7 @@
 			isa = PBXGroup;
 			children = (
 				B1000000000000000000000D /* Info.plist */,
-				B10000000000000000000016 /* NoteTorus.entitlements */,
+				B10000000000000000000016 /* Notouroboros.entitlements */,
 				B10000000000000000000013 /* PrivacyInfo.xcprivacy */,
 				B1000000000000000000000E /* Assets.xcassets */,
 			);
@@ -308,8 +308,8 @@
 		E10000000000000000000004 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C10000000000000000000001 /* NoteTorus.app */,
-				C10000000000000000000002 /* NoteTorusWidgets.appex */,
+				C10000000000000000000001 /* Notouroboros.app */,
+				C10000000000000000000002 /* NotouroborosWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -322,22 +322,22 @@
 			path = Shared;
 			sourceTree = "<group>";
 		};
-		E10000000000000000000006 /* NoteTorusWidgets */ = {
+		E10000000000000000000006 /* NotouroborosWidgets */ = {
 			isa = PBXGroup;
 			children = (
-				B10000000000000000000011 /* NoteTorusWidgets.swift */,
+				B10000000000000000000011 /* NotouroborosWidgets.swift */,
 				B10000000000000000000012 /* Info.plist */,
 				B10000000000000000000099 /* Assets.xcassets */,
 			);
-			path = NoteTorusWidgets;
+			path = NotouroborosWidgets;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		F10000000000000000000001 /* NoteTorus */ = {
+		F10000000000000000000001 /* Notouroboros */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = G10000000000000000000002 /* Build configuration list for PBXNativeTarget "NoteTorus" */;
+			buildConfigurationList = G10000000000000000000002 /* Build configuration list for PBXNativeTarget "Notouroboros" */;
 			buildPhases = (
 				O10000000000000000000001 /* Check Design Rules */,
 				H10000000000000000000001 /* Sources */,
@@ -351,14 +351,14 @@
 			dependencies = (
 				N10000000000000000000001 /* PBXTargetDependency */,
 			);
-			name = NoteTorus;
-			productName = NoteTorus;
-			productReference = C10000000000000000000001 /* NoteTorus.app */;
+			name = Notouroboros;
+			productName = Notouroboros;
+			productReference = C10000000000000000000001 /* Notouroboros.app */;
 			productType = "com.apple.product-type.application";
 		};
-		F10000000000000000000002 /* NoteTorusWidgets */ = {
+		F10000000000000000000002 /* NotouroborosWidgets */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = G10000000000000000000003 /* Build configuration list for PBXNativeTarget "NoteTorusWidgets" */;
+			buildConfigurationList = G10000000000000000000003 /* Build configuration list for PBXNativeTarget "NotouroborosWidgets" */;
 			buildPhases = (
 				H10000000000000000000002 /* Sources */,
 				D10000000000000000000002 /* Frameworks */,
@@ -368,9 +368,9 @@
 			);
 			dependencies = (
 			);
-			name = NoteTorusWidgets;
-			productName = NoteTorusWidgets;
-			productReference = C10000000000000000000002 /* NoteTorusWidgets.appex */;
+			name = NotouroborosWidgets;
+			productName = NotouroborosWidgets;
+			productReference = C10000000000000000000002 /* NotouroborosWidgets.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -396,7 +396,7 @@
 					};
 				};
 			};
-			buildConfigurationList = G10000000000000000000001 /* Build configuration list for PBXProject "NoteTorus" */;
+			buildConfigurationList = G10000000000000000000001 /* Build configuration list for PBXProject "Notouroboros" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -409,8 +409,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				F10000000000000000000001 /* NoteTorus */,
-				F10000000000000000000002 /* NoteTorusWidgets */,
+				F10000000000000000000001 /* Notouroboros */,
+				F10000000000000000000002 /* NotouroborosWidgets */,
 			);
 		};
 /* End PBXProject section */
@@ -449,7 +449,7 @@
 				"$(SRCROOT)/Scripts/check-design-rules.sh",
 				"$(SRCROOT)/Shared",
 				"$(SRCROOT)/Sources/App",
-				"$(SRCROOT)/NoteTorusWidgets",
+				"$(SRCROOT)/NotouroborosWidgets",
 			);
 			name = "Check Design Rules";
 			outputFileListPaths = (
@@ -487,7 +487,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A10000000000000000000001 /* NoteTorusApp.swift in Sources */,
+				A10000000000000000000001 /* NotouroborosApp.swift in Sources */,
 				A10000000000000000000002 /* JournalModels.swift in Sources */,
 				D1F357205DF988A6A87C8C34 /* ProcrastiMateClient.swift in Sources */,
 				D10524AADC104B75224D284D /* TaskEngine.swift in Sources */,
@@ -563,7 +563,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A10000000000000000000010 /* NoteTorusWidgets.swift in Sources */,
+				A10000000000000000000010 /* NotouroborosWidgets.swift in Sources */,
 				A10000000000000000000011 /* RecordingActivityAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -573,7 +573,7 @@
 /* Begin PBXTargetDependency section */
 		N10000000000000000000001 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = F10000000000000000000002 /* NoteTorusWidgets */;
+			target = F10000000000000000000002 /* NotouroborosWidgets */;
 			targetProxy = L10000000000000000000001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -615,7 +615,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Resources/NoteTorus.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Resources/Notouroboros.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = FNYFHG5SV7;
@@ -625,7 +625,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.stefan.notetorus;
-				PRODUCT_NAME = NoteTorus;
+				PRODUCT_NAME = Notouroboros;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -640,7 +640,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Resources/NoteTorus.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Resources/Notouroboros.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = FNYFHG5SV7;
@@ -650,7 +650,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.stefan.notetorus;
-				PRODUCT_NAME = NoteTorus;
+				PRODUCT_NAME = Notouroboros;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -668,7 +668,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = FNYFHG5SV7;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = NoteTorusWidgets/Info.plist;
+				INFOPLIST_FILE = NotouroborosWidgets/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = 1.0;
@@ -691,7 +691,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = FNYFHG5SV7;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = NoteTorusWidgets/Info.plist;
+				INFOPLIST_FILE = NotouroborosWidgets/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = 1.0;
@@ -709,7 +709,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		G10000000000000000000001 /* Build configuration list for PBXProject "NoteTorus" */ = {
+		G10000000000000000000001 /* Build configuration list for PBXProject "Notouroboros" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				K10000000000000000000001 /* Debug */,
@@ -718,7 +718,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		G10000000000000000000002 /* Build configuration list for PBXNativeTarget "NoteTorus" */ = {
+		G10000000000000000000002 /* Build configuration list for PBXNativeTarget "Notouroboros" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				K10000000000000000000003 /* Debug */,
@@ -727,7 +727,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		G10000000000000000000003 /* Build configuration list for PBXNativeTarget "NoteTorusWidgets" */ = {
+		G10000000000000000000003 /* Build configuration list for PBXNativeTarget "NotouroborosWidgets" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				K10000000000000000000005 /* Debug */,

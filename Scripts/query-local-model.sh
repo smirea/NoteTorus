@@ -20,8 +20,8 @@ if [ -z "$device_id" ]; then
 	exit 1
 fi
 
-derived_data="${TMPDIR:-/tmp}/NoteTorusModelProbe"
-build_log="$(mktemp -t notetorus-model-probe)"
+derived_data="${TMPDIR:-/tmp}/NotouroborosModelProbe"
+build_log="$(mktemp -t notouroboros-model-probe)"
 output_path=""
 
 cleanup() {
@@ -35,8 +35,8 @@ trap cleanup EXIT
 
 echo "Building the simulator probe…" >&2
 if ! xcodebuild \
-	-project "$project_root/NoteTorus.xcodeproj" \
-	-scheme NoteTorus \
+	-project "$project_root/Notouroboros.xcodeproj" \
+	-scheme Notouroboros \
 	-configuration Debug \
 	-destination "platform=iOS Simulator,id=$device_id" \
 	-derivedDataPath "$derived_data" \
@@ -46,7 +46,7 @@ then
 	exit 1
 fi
 
-app_path="$derived_data/Build/Products/Debug-iphonesimulator/NoteTorus.app"
+app_path="$derived_data/Build/Products/Debug-iphonesimulator/Notouroboros.app"
 xcrun simctl install "$device_id" "$app_path" >/dev/null 2>&1
 data_container="$(xcrun simctl get_app_container "$device_id" com.stefan.notetorus data)"
 output_path="$data_container/tmp/local-model-probe.txt"

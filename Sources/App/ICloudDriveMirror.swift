@@ -333,6 +333,7 @@ actor ICloudDriveMirror {
 			try check()
 			try Self.requireRegularDestination(url)
 			let timestamp = Int64(Date().timeIntervalSince1970 * 1_000)
+			// The staging prefix keeps the NoteTorus name so cleanup still finds files left by earlier versions in the same container.
 			let stagingURL = url.deletingLastPathComponent().appendingPathComponent(".notetorus-\(timestamp)-\(UUID().uuidString).upload")
 			defer { try? FileManager.default.removeItem(at: stagingURL) }
 			try FileManager.default.copyItem(at: sourceURL, to: stagingURL)

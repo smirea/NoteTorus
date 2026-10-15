@@ -1,6 +1,6 @@
-# NoteTorus
+# Notouroboros
 
-NoteTorus is an iPhone voice memo app that records, transcribes, organizes, and carries useful context into upcoming calendar events.
+Notouroboros is an iPhone voice memo app that records, transcribes, organizes, and carries useful context into upcoming calendar events.
 
 ## Goals
 
@@ -32,7 +32,7 @@ NoteTorus is an iPhone voice memo app that records, transcribes, organizes, and 
 
 ## Storage
 
-The app keeps its working data in the private `Application Support/NoteTorus` container for reliable offline recording and playback. It also mirrors every completed recording to `iCloud Drive/NoteTorus` as a matching `.m4a` and `.json` pair named `YYYY-MM-DD_<city>__<UUID>`. The JSON contains the transcript, title, summary, location, attached event, extracted tasks, and model provenance. Existing recordings are backfilled when the app launches. Deleting a note removes both mirrored files; edits made directly to the exports are not imported back into the app.
+The app keeps its working data in the private `Application Support/NoteTorus` container for reliable offline recording and playback. It also mirrors every completed recording to `iCloud Drive/Notouroboros` as a matching `.m4a` and `.json` pair named `YYYY-MM-DD_<city>__<UUID>`. The JSON contains the transcript, title, summary, location, attached event, extracted tasks, and model provenance. Existing recordings are backfilled when the app launches. Deleting a note removes both mirrored files; edits made directly to the exports are not imported back into the app.
 
 Mirroring runs off the main actor with one coalescing worker. Each pass indexes the export directory once, writes only changed metadata, and reuses successfully copied audio while repairing missing files. Exact content acknowledgments and successful file signatures persist across restarts. Failed work remains eligible at the same revision with finite persisted backoff, and a foreground visit, account change, or manual retry rechecks it. A resolved city replaces its old export pair only after both new files succeed. Cleanup recognizes generated recording filenames and leaves unrelated files alone. New passes wait while recording has priority. These files are local iCloud provider exports; a completed local write does not establish upload to another device.
 
@@ -56,7 +56,7 @@ On-device requests account for the runtime context window, instructions, complet
 
 ## Run
 
-Open `NoteTorus.xcodeproj`, select the `NoteTorus` scheme, and run on an iOS 26 iPhone target. Add `-demo` for sample content.
+Open `Notouroboros.xcodeproj`, select the `Notouroboros` scheme, and run on an iOS 26 iPhone target. Add `-demo` for sample content.
 
 Run the isolated Debug checks on an explicitly selected iOS Simulator:
 
@@ -64,7 +64,7 @@ Run the isolated Debug checks on an explicitly selected iOS Simulator:
 python3 Scripts/run-simulator-checks.py --device <SIMULATOR_UUID>
 ```
 
-The runner builds and installs the app, and checks every registered contract suite. It requires complete success markers and saves build/runtime logs in a new temporary artifact directory. Use `--app /path/to/NoteTorus.app` to reuse an existing Debug Simulator build, or `--list` to validate the check inventory without launching anything.
+The runner builds and installs the app, and checks every registered contract suite. It requires complete success markers and saves build/runtime logs in a new temporary artifact directory. Use `--app /path/to/Notouroboros.app` to reuse an existing Debug Simulator build, or `--list` to validate the check inventory without launching anything.
 
 These checks cover recording and playback ownership, recovery, storage faults, processing cancellation, cloud-provider boundaries, calendar selection, and measured weekly recording time. Synthetic services and temporary storage make them repeatable; passing does not establish microphone hardware reliability, real iCloud upload, calendar-provider behavior, or native model accuracy.
 

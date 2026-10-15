@@ -90,8 +90,8 @@ struct RecordingActivityAttributes: ActivityAttributes, Hashable, Sendable {
 	var captureID: UUID? = nil
 
 	var recordingURL: URL {
-		guard let captureID else { return URL(string: "notetorus://recording")! }
-		return URL(string: "notetorus://recording?id=\(captureID.uuidString)")!
+		guard let captureID else { return URL(string: "notouroboros://recording")! }
+		return URL(string: "notouroboros://recording?id=\(captureID.uuidString)")!
 	}
 
 	private enum CodingKeys: CodingKey { case startedAt, captureID }

@@ -401,7 +401,7 @@ private struct JournalEntryExport: Identifiable {
 		id = entry.id
 		let data = try entry.jsonData()
 		fileURL = FileManager.default.temporaryDirectory
-			.appendingPathComponent("NoteTorus_\(entry.id.uuidString).json")
+			.appendingPathComponent("Notouroboros_\(entry.id.uuidString).json")
 		jsonText = String(decoding: data, as: UTF8.self)
 		try data.write(to: fileURL, options: .atomic)
 	}

@@ -9,7 +9,7 @@
 - Loads local note metadata without blocking the interface, preserves damaged originals, and keeps readable notes available while reporting storage problems.
 - Stores notes and audio locally for offline use and includes them in device backups. Transient stage failures become eligible for retry after 1, 5, and 15 minutes, then wait for manual Retry; unavailable services and unreadable audio wait for manual Retry immediately.
 - Saving, Retry, and Reprocess request continued processing when started in the foreground, with native system progress while transcription and analysis continue after switching apps or locking the screen. Interrupted work also requests an automatic background retry when iOS grants time, and resumes on reopening; force-closing the app stops current processing, and background completion timing depends on iOS. Canceling system progress preserves the audio and completed stages.
-- Mirrors completed recordings to `iCloud Drive/NoteTorus` as matching `YYYY-MM-DD_<city>__<UUID>.m4a` and `.json` files, backfills existing notes, and replaces temporary `Unknown` city names only after the new pair is complete. Skips unchanged exports, checks missing or failed exports again on foreground, and defers new export passes during recording.
+- Mirrors completed recordings to `iCloud Drive/Notouroboros` as matching `YYYY-MM-DD_<city>__<UUID>.m4a` and `.json` files, backfills existing notes, and replaces temporary `Unknown` city names only after the new pair is complete. Skips unchanged exports, checks missing or failed exports again on foreground, and defers new export passes during recording.
 - Stores app settings, named locations, and API keys in a versioned, backed-up `config.json` and mirrors it beside iCloud Drive exports. A readable local configuration stays authoritative; first-install edits remain saved locally while restoration is pending and are retained when remote configuration arrives, including an explicitly cleared API key.
 - Preserves unreadable local configuration and leaves damaged, unsupported, or conflicting remote configuration unresolved during first-install restoration, instead of replacing it with defaults. Notes and recording remain available independently; Settings reports pending exports or configuration problems with a retry action.
 - Remembers completed exports and pending deletions across restarts, retries transient iCloud failures after 5 seconds, 30 seconds, and 3 minutes, then waits for a change, foreground visit, account change, or manual retry. A local iCloud export does not claim upload to other devices.
@@ -56,7 +56,7 @@
 
 # Note Screen
 
-- Has no visible back button and uses the native leading-edge back swipe. `notetorus://entry?id=<uuid>` opens a note, with the UUID in either case, as ProcrastiMate's task links do.
+- Has no visible back button and uses the native leading-edge back swipe. `notouroboros://entry?id=<uuid>` opens a note, with the UUID in either case, as ProcrastiMate's task links do.
 - Shows a saved place name or the captured city with the compact date, truncating long names; without location it shows `Voice memo` and omits the map.
 - Shows an attached event below the header with a calendar icon.
 - Tapping an attached event resolves the exact occurrence in its original calendar; missing or ambiguous events show an unavailable message. Uses a current provider link for nonrecurring events when preferred, with native detail as fallback; recurring events use native detail because attached links may target the whole series.

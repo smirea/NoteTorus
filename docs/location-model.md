@@ -36,7 +36,7 @@ The map and Google Maps link use the canonical pin. Note JSON continues to conta
 
 ## Configuration and restore
 
-`Application Support/Talkward/config.json` is the versioned configuration source for settings, named locations, API keys, and future app-wide configuration:
+`Application Support/NoteTorus/config.json` is the versioned configuration source for settings, named locations, API keys, and future app-wide configuration:
 
 ```json
 {
@@ -58,6 +58,6 @@ The map and Google Maps link use the canonical pin. Note JSON continues to conta
 }
 ```
 
-The file is written atomically, included in device backup, and mirrored to `iCloud Drive/Talkward/config.json`. API keys are stored as plain text. On a fresh install with no local config, the app attempts to restore the iCloud copy before creating one from legacy settings. Once a local config exists it remains authoritative; iCloud note exports are still not imported or merged.
+The file is written atomically, included in device backup, and mirrored to `iCloud Drive/NoteTorus/config.json`. API keys are stored as plain text. On a fresh install with no local config, the app attempts to restore the iCloud copy before creating one from legacy settings. Once a local config exists it remains authoritative; iCloud note exports are still not imported or merged.
 
 Unknown JSON fields are ignored and a missing top-level locations collection defaults safely, allowing the schema to grow without breaking older backups.

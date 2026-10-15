@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct TalkwardApp: App {
+struct NoteTorusApp: App {
 	@State private var store: JournalStore
 	@State private var recordingSession: RecordingSession
 

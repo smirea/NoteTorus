@@ -289,7 +289,7 @@ enum MemoTaskContractChecks {
 			&& !MemoDeletionPrompt.asksAboutTasks(delivery: nil, remote: nil),
 			"Only a memo with tasks still in ProcrastiMate asks whether to delete them")
 		let id = UUID()
-		try expect(AppDeepLink(url: URL(string: "talkward://entry?id=\(id.uuidString.lowercased())")!) == .entry(id),
+		try expect(AppDeepLink(url: URL(string: "notetorus://entry?id=\(id.uuidString.lowercased())")!) == .entry(id),
 			"ProcrastiMate's lowercase memo links open the memo")
 		try expect(ProcrastiMateLink.taskURL("t-1")?.absoluteString == "procrastimate://task/t-1", "Task rows open ProcrastiMate's task link")
 	}

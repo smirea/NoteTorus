@@ -166,7 +166,7 @@ enum ReflectionEngine {
 			summary: includeSummary
 				? sentences.prefix(2).map(cleanSentence).joined(separator: ". ").nonempty
 				: nil,
-			modelName: "Talkward local parser"
+			modelName: "NoteTorus local parser"
 		)
 	}
 

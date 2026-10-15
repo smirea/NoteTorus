@@ -64,7 +64,7 @@ struct ProcrastiMateClient: Sendable {
 		request.httpBody = body
 		request.setValue("Bearer \(credentials.token)", forHTTPHeaderField: "Authorization")
 		request.setValue(device, forHTTPHeaderField: "x-procrastimate-device")
-		request.setValue("Talkward", forHTTPHeaderField: "x-procrastimate-device-name")
+		request.setValue("NoteTorus", forHTTPHeaderField: "x-procrastimate-device-name")
 		if body != nil { request.setValue("application/json", forHTTPHeaderField: "Content-Type") }
 		let (data, response) = try await URLSession.shared.data(for: request)
 		guard let status = (response as? HTTPURLResponse)?.statusCode else { throw ProcrastiMateError.invalidResponse }
@@ -127,7 +127,7 @@ enum ProcrastiMateLink {
 	static func deviceID(defaults: UserDefaults = .standard) -> String {
 		let key = "procrastimate-device-id"
 		if let saved = defaults.string(forKey: key) { return saved }
-		let id = "talkward-\(UUID().uuidString.lowercased())"
+		let id = "notetorus-\(UUID().uuidString.lowercased())"
 		defaults.set(id, forKey: key)
 		return id
 	}

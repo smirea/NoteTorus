@@ -8,9 +8,9 @@ Choose a dedicated iOS Simulator from `xcrun simctl list devices available`, the
 python3 Scripts/run-simulator-checks.py --device <SIMULATOR_UUID>
 ```
 
-The Python standard-library runner builds Debug, boots only the requested device when necessary, installs `Talkward.app`, and launches with `-demo`. It verifies every registered contract suite in one launch (the waveform flag runs two suites). The manifest in [`Scripts/simulator-checks.json`](../Scripts/simulator-checks.json) must match the app's registered launch hooks, source flags, and full success markers; source drift fails before launch.
+The Python standard-library runner builds Debug, boots only the requested device when necessary, installs `NoteTorus.app`, and launches with `-demo`. It verifies every registered contract suite in one launch (the waveform flag runs two suites). The manifest in [`Scripts/simulator-checks.json`](../Scripts/simulator-checks.json) must match the app's registered launch hooks, source flags, and full success markers; source drift fails before launch.
 
-`--app /path/to/Talkward.app` reuses an existing Debug Simulator build. `--artifacts /new/output/directory` selects a new log directory. `--timeout 180` controls each app run, and `--build-timeout 600` controls the build; both values are seconds. `--list` validates and lists the inventory without using a Simulator.
+`--app /path/to/NoteTorus.app` reuses an existing Debug Simulator build. `--artifacts /new/output/directory` selects a new log directory. `--timeout 180` controls each app run, and `--build-timeout 600` controls the build; both values are seconds. `--list` validates and lists the inventory without using a Simulator.
 
 The runner returns nonzero for a failed command, missing or duplicate success marker, process exit before completion, or deadline. It terminates only this app and its own host subprocesses, with bounded cleanup. It never chooses a device automatically, erases or uninstalls anything, or deletes its artifact directory. The selected Simulator remains booted. Inspect `build.log`, `contracts.log`, and the success-only `summary.json` in the printed artifact directory.
 
@@ -24,7 +24,7 @@ Install a Debug build and launch one fixture on the selected device:
 
 ```sh
 xcrun simctl launch --terminate-running-process <SIMULATOR_UUID> \
-  com.stefan.talkward -demo -demo-settings
+  com.stefan.notetorus -demo -demo-settings
 xcrun simctl io <SIMULATOR_UUID> screenshot /path/to/settings.png
 ```
 
@@ -52,13 +52,13 @@ The weekly chart uses saved durations grouped by recording date; it is independe
 Debug builds can create a memo from text and send its tasks to a real or stub ProcrastiMate server. Launch without `-demo`:
 
 ```sh
-xcrun simctl launch --console <SIMULATOR_UUID> com.stefan.talkward \
+xcrun simctl launch --console <SIMULATOR_UUID> com.stefan.notetorus \
   -seed-memo "Next week before the standup I should bring the release slides. Call the plumber tomorrow at 3pm." \
   -seed-event-title "Standup" \
   -procrastimate-link '{"apiURL":"http://127.0.0.1:6120","token":"<bearer token>"}'
 ```
 
-The app prints `SEEDED_MEMO <lowercase id>`, runs title analysis and the on-device task model, then sends the tasks. `-seed-event-title` attaches the next cached calendar event with that title, or a synthetic event shaped by `-seed-event-start <ISO 8601>`, `-seed-event-minutes`, and `-seed-event-recurring`. Where the on-device model cannot generate, as in the iOS 26.5 Simulator, add `-seed-task-drafts '[{"title":"Bring the release slides","link":"next"},{"title":"Call the plumber","when":"tomorrow at 3pm"}]'`; the drafts replace only the model call, still pass grounding and event resolution, and the memo skips title analysis. `-procrastimate-link` stands in for the shared keychain item and an installed app; `not-installed` or `signed-out` simulate the blocked states. Without it, a signed build reads the real keychain item ProcrastiMate writes. Open a seeded note with `xcrun simctl openurl <SIMULATOR_UUID> "talkward://entry?id=<id>"`.
+The app prints `SEEDED_MEMO <lowercase id>`, runs title analysis and the on-device task model, then sends the tasks. `-seed-event-title` attaches the next cached calendar event with that title, or a synthetic event shaped by `-seed-event-start <ISO 8601>`, `-seed-event-minutes`, and `-seed-event-recurring`. Where the on-device model cannot generate, as in the iOS 26.5 Simulator, add `-seed-task-drafts '[{"title":"Bring the release slides","link":"next"},{"title":"Call the plumber","when":"tomorrow at 3pm"}]'`; the drafts replace only the model call, still pass grounding and event resolution, and the memo skips title analysis. `-procrastimate-link` stands in for the shared keychain item and an installed app; `not-installed` or `signed-out` simulate the blocked states. Without it, a signed build reads the real keychain item ProcrastiMate writes. Open a seeded note with `xcrun simctl openurl <SIMULATOR_UUID> "notetorus://entry?id=<id>"`.
 
 ## Optional native checks
 

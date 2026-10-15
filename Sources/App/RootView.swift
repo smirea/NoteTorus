@@ -6,7 +6,7 @@ enum AppDeepLink: Equatable, Sendable {
 	case recording(UUID?)
 
 	init?(url: URL) {
-		guard url.scheme?.lowercased() == "talkward" else { return nil }
+		guard url.scheme?.lowercased() == "notetorus" else { return nil }
 		let ids = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.filter { $0.name == "id" } ?? []
 		let id = ids.count == 1 ? ids.first?.value.flatMap(UUID.init(uuidString:)) : nil
 		switch url.host?.lowercased() {

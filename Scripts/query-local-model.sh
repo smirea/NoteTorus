@@ -48,7 +48,7 @@ fi
 
 app_path="$derived_data/Build/Products/Debug-iphonesimulator/Notouroboros.app"
 xcrun simctl install "$device_id" "$app_path" >/dev/null 2>&1
-data_container="$(xcrun simctl get_app_container "$device_id" com.stefan.notetorus data)"
+data_container="$(xcrun simctl get_app_container "$device_id" com.stefan.notouroboros data)"
 output_path="$data_container/tmp/local-model-probe.txt"
 if [ -f "$output_path" ]; then
 	trash "$output_path"
@@ -59,7 +59,7 @@ xcrun simctl launch \
 	--terminate-running-process \
 	--console-pty \
 	"$device_id" \
-	com.stefan.notetorus \
+	com.stefan.notouroboros \
 	-demo \
 	-local-model-prompt \
 	"$prompt" >/dev/null 2>&1

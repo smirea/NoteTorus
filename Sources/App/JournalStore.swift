@@ -117,8 +117,7 @@ final class JournalStore {
 		configurationInitialValue = initialConfiguration
 		configurationIntentValue = initialConfiguration
 		let applicationSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-		// The folder keeps the NoteTorus name so data from earlier installs stays in place.
-		rootURL = storageRootURL ?? applicationSupport.appendingPathComponent("NoteTorus", isDirectory: true)
+		rootURL = storageRootURL ?? applicationSupport.appendingPathComponent("Notouroboros", isDirectory: true)
 		recordingsURL = rootURL.appendingPathComponent("Recordings", isDirectory: true)
 		repository = JournalRepository(rootURL: rootURL)
 		configurationRepository = ConfigurationRepository(rootURL: rootURL)

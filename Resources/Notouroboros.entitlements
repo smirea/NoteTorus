@@ -4,7 +4,7 @@
 <dict>
 	<key>com.apple.developer.icloud-container-identifiers</key>
 	<array>
-		<string>iCloud.com.stefan.notetorus</string>
+		<string>iCloud.com.stefan.notouroboros</string>
 	</array>
 	<key>com.apple.developer.icloud-services</key>
 	<array>
@@ -12,12 +12,12 @@
 	</array>
 	<key>keychain-access-groups</key>
 	<array>
-		<string>$(AppIdentifierPrefix)com.stefan.notetorus</string>
+		<string>$(AppIdentifierPrefix)com.stefan.notouroboros</string>
 		<string>$(AppIdentifierPrefix)com.stefan.shared</string>
 	</array>
 	<key>com.apple.developer.ubiquity-container-identifiers</key>
 	<array>
-		<string>iCloud.com.stefan.notetorus</string>
+		<string>iCloud.com.stefan.notouroboros</string>
 	</array>
 </dict>
 </plist>

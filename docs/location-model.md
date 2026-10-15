@@ -36,7 +36,7 @@ The map and Google Maps link use the canonical pin. Note JSON continues to conta
 
 ## Configuration and restore
 
-`Application Support/NoteTorus/config.json` is the versioned configuration source for settings, named locations, API keys, and future app-wide configuration:
+`Application Support/Notouroboros/config.json` is the versioned configuration source for settings, named locations, API keys, and future app-wide configuration:
 
 ```json
 {

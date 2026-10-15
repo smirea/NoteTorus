@@ -32,7 +32,7 @@
 	<string>Read calendar events so you can attach a recording to the event it belongs to. Notouroboros never changes calendar data.</string>
 	<key>NSUbiquitousContainers</key>
 	<dict>
-		<key>iCloud.com.stefan.notetorus</key>
+		<key>iCloud.com.stefan.notouroboros</key>
 		<dict>
 			<key>NSUbiquitousContainerIsDocumentScopePublic</key>
 			<true/>
@@ -75,8 +75,8 @@
 	</array>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>com.stefan.notetorus.processing.continued.*</string>
-		<string>com.stefan.notetorus.processing.recovery</string>
+		<string>com.stefan.notouroboros.processing.continued.*</string>
+		<string>com.stefan.notouroboros.processing.recovery</string>
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>

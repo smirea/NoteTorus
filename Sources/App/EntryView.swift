@@ -417,7 +417,7 @@ private final class CopyJSONTextActivity: UIActivity {
 
 	override class var activityCategory: UIActivity.Category { .action }
 	override var activityType: UIActivity.ActivityType? {
-		UIActivity.ActivityType("com.stefan.notetorus.copy-json-text")
+		UIActivity.ActivityType("com.stefan.notouroboros.copy-json-text")
 	}
 	override var activityTitle: String? { "Copy JSON Text" }
 	override var activityImage: UIImage? { UIImage(systemName: "doc.on.doc") }

@@ -16,7 +16,7 @@ import time
 import uuid
 
 ROOT = Path(__file__).resolve().parents[1]
-BUNDLE = "com.stefan.notetorus"
+BUNDLE = "com.stefan.notouroboros"
 
 
 class CheckFailure(Exception):

@@ -24,7 +24,7 @@ Install a Debug build and launch one fixture on the selected device:
 
 ```sh
 xcrun simctl launch --terminate-running-process <SIMULATOR_UUID> \
-  com.stefan.notetorus -demo -demo-settings
+  com.stefan.notouroboros -demo -demo-settings
 xcrun simctl io <SIMULATOR_UUID> screenshot /path/to/settings.png
 ```
 
@@ -52,7 +52,7 @@ The weekly chart uses saved durations grouped by recording date; it is independe
 Debug builds can create a memo from text and send its tasks to a real or stub ProcrastiMate server. Launch without `-demo`:
 
 ```sh
-xcrun simctl launch --console <SIMULATOR_UUID> com.stefan.notetorus \
+xcrun simctl launch --console <SIMULATOR_UUID> com.stefan.notouroboros \
   -seed-memo "Next week before the standup I should bring the release slides. Call the plumber tomorrow at 3pm." \
   -seed-event-title "Standup" \
   -procrastimate-link '{"apiURL":"http://127.0.0.1:6120","token":"<bearer token>"}'

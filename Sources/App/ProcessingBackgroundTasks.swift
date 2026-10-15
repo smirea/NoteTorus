@@ -50,8 +50,8 @@ final class ProcessingBackgroundTask {
 
 @MainActor
 struct ProcessingBackgroundOperations {
-	static let recoveryIdentifier = "com.stefan.notetorus.processing.recovery"
-	static let continuedPrefix = "com.stefan.notetorus.processing.continued."
+	static let recoveryIdentifier = "com.stefan.notouroboros.processing.recovery"
+	static let continuedPrefix = "com.stefan.notouroboros.processing.continued."
 
 	var isForeground: () -> Bool
 	var registerRecovery: (@escaping @MainActor (ProcessingBackgroundTask) -> Void) -> Bool
@@ -98,7 +98,7 @@ final class ProcessingBackgroundTasks {
 	private var pendingIdentifier: String?
 	private var recoveryRequest: RecoveryRequest?
 	private var recoveryRegistered = false
-	private let logger = Logger(subsystem: "com.stefan.notetorus", category: "BackgroundProcessing")
+	private let logger = Logger(subsystem: "com.stefan.notouroboros", category: "BackgroundProcessing")
 
 	private struct RecoveryRequest: Equatable {
 		let date: Date
